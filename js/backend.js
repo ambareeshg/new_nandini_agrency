@@ -105,27 +105,52 @@
         if (phone) {
             // Custom OTP verification for phone
             try {
-                const { data, error } = await client
+                console.log('Verifying OTP for phone:', phone, 'with token:', token);
+                
+                // First, get the most recent OTP for this phone
+                const { data: otpData, error: otpError } = await client
                     .from('user_otp')
                     .select('*')
                     .eq('email', phone)
                     .eq('channel', 'sms')
-                    .eq('otp_code', token)
                     .eq('is_verified', false)
-                    .gt('expires_at', new Date().toISOString())
                     .order('sent_at', { ascending: false })
                     .limit(1)
-                    .single();
+                    .maybeSingle();
                 
-                if (error || !data) {
-                    return { error: 'Invalid or expired OTP' };
+                console.log('OTP query result:', { otpData, otpError });
+                
+                if (otpError) {
+                    console.error('OTP query error:', otpError);
+                    return { error: 'Failed to verify OTP' };
                 }
+                
+                if (!otpData) {
+                    console.log('No unverified OTP found for phone:', phone);
+                    return { error: 'No OTP found for this phone number' };
+                }
+                
+                // Check if OTP is expired
+                const now = new Date();
+                const expiresAt = new Date(otpData.expires_at);
+                if (now > expiresAt) {
+                    console.log('OTP expired. Now:', now, 'Expires:', expiresAt);
+                    return { error: 'OTP has expired. Please request a new one.' };
+                }
+                
+                // Check if OTP code matches
+                if (otpData.otp_code !== token) {
+                    console.log('OTP code mismatch. Expected:', otpData.otp_code, 'Received:', token);
+                    return { error: 'Invalid OTP code' };
+                }
+                
+                console.log('OTP verification successful');
                 
                 // Mark OTP as verified
                 await client
                     .from('user_otp')
                     .update({ is_verified: true })
-                    .eq('id', data.id);
+                    .eq('id', otpData.id);
                 
                 // Create or get user session (simulate login)
                 const user = {
@@ -187,6 +212,37 @@
         if (!client) return { error: 'no-client' };
         
         try {
+            // Check if user already exists by phone or email
+            const existingUserChecks = [];
+            
+            if (details.phone) {
+                existingUserChecks.push(
+                    client.from('user_data').select('*').eq('phone', details.phone).single()
+                );
+            }
+            
+            if (details.email) {
+                existingUserChecks.push(
+                    client.from('user_data').select('*').eq('email', details.email).single()
+                );
+            }
+            
+            // Check for existing users
+            const existingUsers = await Promise.all(existingUserChecks);
+            
+            for (const result of existingUsers) {
+                if (result.data && !result.error) {
+                    // User already exists
+                    const existingUser = result.data;
+                    if (existingUser.phone === details.phone) {
+                        return { error: 'User with this phone number already exists. Please login.' };
+                    }
+                    if (existingUser.email === details.email) {
+                        return { error: 'User with this email already exists. Please login.' };
+                    }
+                }
+            }
+            
             const payload = {
                 email: details.email || null,
                 phone: details.phone || null,
