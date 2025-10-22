@@ -173,6 +173,7 @@
                     <div class="form-group"><label for="su-address">Address</label><input id="su-address" type="text" required></div>
                     <div class="form-group"><label for="su-landmark">Landmark</label><input id="su-landmark" type="text" required></div>
                     <div class="form-group"><label for="su-pincode">Pincode</label><input id="su-pincode" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit pincode" required></div>
+                    <div id="pincode-status" style="font-size:.9rem; color:#666; margin-bottom: .5rem;"></div>
                     <div class="form-group"><label for="su-city">City</label>
                         <select id="su-city" required>
                             <option value="">Select city</option>
@@ -210,7 +211,6 @@
                     </div>
                     <div class="form-group"><label for="su-state">State</label><input id="su-state" type="text" value="Karnataka" required></div>
                     <div class="form-group"><label for="su-alt">Alternate Phone</label><input id="su-alt" type="text" inputmode="numeric" maxlength="10" placeholder="10 digits" required></div>
-                    <div id="pincode-status" style="font-size:.9rem; color:#666; margin-bottom: .5rem;"></div>
                     <div id="form-progress" style="margin-bottom: 1rem;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                             <span style="font-size: 0.9rem; color: #666;">Form Progress</span>
@@ -455,6 +455,8 @@
             } else {
                 su.pinStatus.textContent = '';
             }
+            // Update progress after pincode validation
+            updateButtonState();
         });
 
         // Function to check if all fields are valid
@@ -466,23 +468,48 @@
         // Update progress bar
         function updateProgress() {
             const fields = [su.name, su.phone, su.email, su.address, su.landmark, su.pincode, su.city, su.state, su.alt];
-            const validCount = fields.filter(field => {
+            let validCount = 0;
+            
+            fields.forEach(field => {
                 const value = field.value.trim();
                 const fieldName = field.id.replace('su-', '');
+                let isValid = false;
                 
                 switch(fieldName) {
-                    case 'name': return value.length >= 2;
-                    case 'phone': return value.length === 10;
-                    case 'email': return validEmail(value);
-                    case 'address': return value.length >= 10;
-                    case 'landmark': return value.length >= 3;
-                    case 'pincode': return value.length === 6;
-                    case 'city': return value !== '';
-                    case 'state': return value.length >= 2;
-                    case 'alt': return value.length === 10;
-                    default: return false;
+                    case 'name': 
+                        isValid = value.length >= 2;
+                        break;
+                    case 'phone': 
+                        isValid = value.length === 10;
+                        break;
+                    case 'email': 
+                        isValid = validEmail(value);
+                        break;
+                    case 'address': 
+                        isValid = value.length >= 10;
+                        break;
+                    case 'landmark': 
+                        isValid = value.length >= 3;
+                        break;
+                    case 'pincode': 
+                        isValid = value.length === 6;
+                        break;
+                    case 'city': 
+                        isValid = value !== '';
+                        break;
+                    case 'state': 
+                        isValid = value.length >= 2;
+                        break;
+                    case 'alt': 
+                        isValid = value.length === 10;
+                        break;
                 }
-            }).length;
+                
+                if (isValid) validCount++;
+                
+                // Debug logging
+                console.log(`Field ${fieldName}: "${value}" - Valid: ${isValid}`);
+            });
             
             const progressPercent = (validCount / fields.length) * 100;
             const progressBar = document.getElementById('progress-bar');
@@ -493,6 +520,7 @@
                 progressText.textContent = `${validCount}/${fields.length} fields completed`;
             }
             
+            console.log(`Progress: ${validCount}/${fields.length} (${progressPercent.toFixed(1)}%)`);
             return validCount === fields.length;
         }
 
@@ -519,8 +547,13 @@
             field.addEventListener('blur', updateButtonState);
         });
 
-        // Initial button state
+        // Initial button state and progress
         updateButtonState();
+        
+        // Also update progress after a short delay to ensure all elements are loaded
+        setTimeout(() => {
+            updateButtonState();
+        }, 100);
 
         su.submit.addEventListener('click', async () => {
             su.error.classList.remove('show');
