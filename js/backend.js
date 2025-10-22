@@ -229,6 +229,24 @@
         await client.from('user_orders').update({ status }).eq('order_id', orderId);
     }
 
+    // Debug function to test pincode directly
+    async function debugPincode(pincode) {
+        const client = await getClient();
+        if (!client) {
+            console.error('No Supabase client');
+            return;
+        }
+        
+        try {
+            const { data, error } = await client.from('pincode_status').select('*').eq('pincode', pincode);
+            console.log('Debug pincode query result:', { data, error });
+            return { data, error };
+        } catch (err) {
+            console.error('Debug pincode exception:', err);
+            return { error: err };
+        }
+    }
+
     // Expose API
     window.backend = {
         getCurrentUser,
@@ -238,6 +256,7 @@
         upsertUserProfile,
         saveUserProfile,
         checkPincodeDeliverable,
+        debugPincode,
         signOut,
         syncCartItem,
         clearUserCart,

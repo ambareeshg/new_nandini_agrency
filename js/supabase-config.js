@@ -1,7 +1,7 @@
 // Supabase Configuration for Nandini Pharma
 // Replace these values with your actual Supabase project details
 
-window.SUPABASE_URL = 'https://supabase.com/dashboard/project/nydnfxkwawzixjaoydtf';
+window.SUPABASE_URL = 'https://nydnfxkwawzixjaoydtf.supabase.co';
 window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55ZG5meGt3YXd6aXhqYW95ZHRmIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MTEyMjM0NiwiZXhwIjoyMDc2Njk4MzQ2fQ.QkYiLtie4ImS-w1j7-zBqoyJEglg212Da9FqCEjztq0';
 
 // Instructions:
