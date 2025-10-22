@@ -712,9 +712,9 @@
             hideAccountCreationLoading();
             showAccountCreationSuccess();
             
-            // Navigate to orders page after animation
+            // Navigate to home page after animation
             setTimeout(() => {
-                window.location.href = 'order-history.html';
+                window.location.href = 'index.html';
             }, 3000);
         });
     });
@@ -762,10 +762,10 @@
                 <div class="success-icon">✓</div>
                 <h2>Account Created Successfully!</h2>
                 <p>Welcome to Nandini Pharma! Your account has been set up.</p>
-                <p>Redirecting you to your orders...</p>
+                <p>Redirecting you to the homepage...</p>
                 <div class="success-actions">
-                    <button onclick="window.location.href='order-history.html'" class="btn-primary">View Orders</button>
-                    <button onclick="window.location.href='index.html'" class="btn-secondary">Continue Shopping</button>
+                    <button onclick="window.location.href='index.html'" class="btn-primary">Go to Homepage</button>
+                    <button onclick="window.location.href='products.html'" class="btn-secondary">Browse Products</button>
                 </div>
             </div>
         `;

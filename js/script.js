@@ -235,6 +235,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setupMobileMenu();
     setupScrollAnimations();
     setupNavbarScroll();
+    updateNavigationForUser();
 });
 
 function updateCartCount() {
@@ -1027,3 +1028,130 @@ animationStyles.textContent = `
     }
 `;
 document.head.appendChild(animationStyles);
+
+// Account Modal Functions
+async function updateNavigationForUser() {
+    const user = await (window.backend && window.backend.getCurrentUser());
+    const loginNavItem = document.getElementById('login-nav-item');
+    const accountNavItem = document.getElementById('account-nav-item');
+    
+    if (user) {
+        // User is logged in - show account icon, hide login
+        if (loginNavItem) loginNavItem.style.display = 'none';
+        if (accountNavItem) accountNavItem.style.display = 'block';
+    } else {
+        // User is not logged in - show login, hide account icon
+        if (loginNavItem) loginNavItem.style.display = 'block';
+        if (accountNavItem) accountNavItem.style.display = 'none';
+    }
+}
+
+async function showAccountModal() {
+    const modal = document.getElementById('account-modal');
+    const loading = document.getElementById('account-loading');
+    const details = document.getElementById('account-details');
+    const error = document.getElementById('account-error');
+    
+    // Show modal
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('show'), 10);
+    
+    // Show loading state
+    loading.style.display = 'block';
+    details.style.display = 'none';
+    error.style.display = 'none';
+    
+    try {
+        // Fetch user account details
+        const result = await window.backend.getUserAccountDetails();
+        
+        if (result.error) {
+            // Show error state
+            loading.style.display = 'none';
+            error.style.display = 'block';
+            console.error('Error loading account details:', result.error);
+            return;
+        }
+        
+        // Populate account details
+        const userData = result.data;
+        document.getElementById('account-name').textContent = userData.name || 'Not provided';
+        document.getElementById('account-email').textContent = userData.email || 'Not provided';
+        document.getElementById('account-phone').textContent = userData.phone || 'Not provided';
+        document.getElementById('account-alt-phone').textContent = userData.alt_phone || 'Not provided';
+        document.getElementById('account-address').textContent = userData.address || 'Not provided';
+        document.getElementById('account-landmark').textContent = userData.landmark || 'Not provided';
+        document.getElementById('account-city').textContent = userData.city || 'Not provided';
+        document.getElementById('account-state').textContent = userData.state || 'Not provided';
+        document.getElementById('account-pincode').textContent = userData.pincode || 'Not provided';
+        
+        // Format dates
+        const createdDate = userData.date_created ? new Date(userData.date_created).toLocaleDateString() : 'Not available';
+        const updatedDate = userData.date_modified ? new Date(userData.date_modified).toLocaleDateString() : 'Not available';
+        document.getElementById('account-created').textContent = createdDate;
+        document.getElementById('account-updated').textContent = updatedDate;
+        
+        // Show details
+        loading.style.display = 'none';
+        details.style.display = 'block';
+        
+    } catch (e) {
+        console.error('Error in showAccountModal:', e);
+        loading.style.display = 'none';
+        error.style.display = 'block';
+    }
+}
+
+function closeAccountModal() {
+    const modal = document.getElementById('account-modal');
+    modal.classList.remove('show');
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
+}
+
+async function logoutUser() {
+    try {
+        // Sign out from backend
+        await window.backend.signOut();
+        
+        // Clear local cart
+        localStorage.removeItem('cart');
+        
+        // Update navigation
+        await updateNavigationForUser();
+        
+        // Close modal
+        closeAccountModal();
+        
+        // Show success message
+        showNotification('Logged out successfully!', 'success');
+        
+        // Redirect to home page
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1000);
+        
+    } catch (e) {
+        console.error('Error during logout:', e);
+        showNotification('Error during logout. Please try again.', 'error');
+    }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('account-modal');
+    if (e.target === modal) {
+        closeAccountModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('account-modal');
+        if (modal && modal.classList.contains('show')) {
+            closeAccountModal();
+        }
+    }
+});

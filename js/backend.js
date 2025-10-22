@@ -132,11 +132,13 @@
                     id: 'temp-' + Date.now(),
                     email: phone,
                     phone: phone,
+                    name: 'User',
                     created_at: new Date().toISOString()
                 };
                 
                 // Store user session in localStorage for demo
                 localStorage.setItem('current_user', JSON.stringify(user));
+                console.log('OTP login session created:', user);
                 
                 return { data: { user }, error: null };
             } catch (e) {
@@ -207,6 +209,20 @@
             }
             
             console.log('User account created successfully:', data);
+            
+            // Create user session for the new account
+            const userSession = {
+                id: data.user_id,
+                email: data.email,
+                phone: data.phone,
+                name: data.name,
+                created_at: data.created_at
+            };
+            
+            // Store user session in localStorage
+            localStorage.setItem('current_user', JSON.stringify(userSession));
+            console.log('User session created:', userSession);
+            
             return { data, error: null };
         } catch (e) {
             console.error('User creation exception:', e);
@@ -358,15 +374,59 @@
         }
     }
 
+    // Check if user is logged in (for navigation purposes)
+    function isUserLoggedIn() {
+        const customUser = localStorage.getItem('current_user');
+        if (customUser) {
+            try {
+                return JSON.parse(customUser);
+            } catch (e) {
+                localStorage.removeItem('current_user');
+                return null;
+            }
+        }
+        return null;
+    }
+
+    // Get user account details for account modal
+    async function getUserAccountDetails() {
+        const client = await getClient();
+        if (!client) return { error: 'no-client' };
+        
+        try {
+            const currentUser = await getCurrentUser();
+            if (!currentUser) return { error: 'not-logged-in' };
+            
+            // Get user data from user_data table
+            const { data, error } = await client
+                .from('user_data')
+                .select('*')
+                .eq('user_id', currentUser.id)
+                .single();
+                
+            if (error) {
+                console.error('Error fetching user account details:', error);
+                return { error: 'Failed to fetch account details' };
+            }
+            
+            return { data, error: null };
+        } catch (e) {
+            console.error('Error in getUserAccountDetails:', e);
+            return { error: 'Failed to fetch account details' };
+        }
+    }
+
     // Expose API
     window.backend = {
         getCurrentUser,
+        isUserLoggedIn,
         requestEmailOtp,
         requestPhoneOtp,
         verifyOtp,
         upsertUserProfile,
         saveUserProfile,
         createUserAccount,
+        getUserAccountDetails,
         checkPincodeDeliverable,
         debugPincode,
         signOut,

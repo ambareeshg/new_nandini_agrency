@@ -1,9 +1,18 @@
 // Cart functionality
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check if user is logged in
+    const user = await (window.backend && window.backend.getCurrentUser());
+    if (!user) {
+        // Redirect to login page if not logged in
+        window.location.href = 'login.html';
+        return;
+    }
+    
     loadCartItems();
     updateCartCount();
     setupCartAnimations();
     setupMobileMenu();
+    updateNavigationForUser();
 });
 
 // Get products from localStorage or use default

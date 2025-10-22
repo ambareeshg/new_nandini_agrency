@@ -1,18 +1,20 @@
-document.addEventListener('DOMContentLoaded', function() {
-    // Require login
-    window.backend && window.backend.getCurrentUser().then(user => {
-        if (!user) {
-            window.location.href = 'login.html';
-            return;
-        }
-        loadCheckoutItems();
-        updateCartCount();
-        setupCheckoutAnimations();
-        setupMobileMenu();
-        document.getElementById('checkout-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            placeOrder();
-        });
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check if user is logged in
+    const user = await (window.backend && window.backend.getCurrentUser());
+    if (!user) {
+        // Redirect to login page if not logged in
+        window.location.href = 'login.html';
+        return;
+    }
+    
+    loadCheckoutItems();
+    updateCartCount();
+    setupCheckoutAnimations();
+    setupMobileMenu();
+    updateNavigationForUser();
+    document.getElementById('checkout-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        placeOrder();
     });
 });
 

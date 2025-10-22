@@ -22,7 +22,8 @@
                     <li><a href="cart.html" class="nav-link">Cart (<span id="cart-count">0</span>)</a></li>
                     <li><a href="track-order.html" class="nav-link">Track Order</a></li>
                     <li><a href="order-history.html" class="nav-link">Order History</a></li>
-                    <li><a href="login.html" class="nav-link">Login</a></li>
+                    <li id="login-nav-item"><a href="login.html" class="nav-link">Login</a></li>
+                    <li id="account-nav-item" style="display: none;"><a href="#" class="nav-link account-icon" onclick="showAccountModal()">👤</a></li>
                     <li><a href="admin.html" class="nav-link">Admin</a></li>
                 </ul>
                 <div class="hamburger">
@@ -85,6 +86,86 @@
             </div>
         </div>
     </footer>
+
+    <!-- Account Modal -->
+    <div id="account-modal" class="account-modal" style="display: none;">
+        <div class="account-modal-content">
+            <div class="account-modal-header">
+                <h3>Account Details</h3>
+                <button class="close-account-modal" onclick="closeAccountModal()">&times;</button>
+            </div>
+            <div class="account-modal-body">
+                <div id="account-loading" class="account-loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading account details...</p>
+                </div>
+                <div id="account-details" class="account-details" style="display: none;">
+                    <div class="account-info-section">
+                        <h4>Personal Information</h4>
+                        <div class="info-row">
+                            <span class="info-label">Name:</span>
+                            <span id="account-name" class="info-value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Email:</span>
+                            <span id="account-email" class="info-value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Phone:</span>
+                            <span id="account-phone" class="info-value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Alternative Phone:</span>
+                            <span id="account-alt-phone" class="info-value">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="account-info-section">
+                        <h4>Address Information</h4>
+                        <div class="info-row">
+                            <span class="info-label">Address:</span>
+                            <span id="account-address" class="info-value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Landmark:</span>
+                            <span id="account-landmark" class="info-value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">City:</span>
+                            <span id="account-city" class="info-value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">State:</span>
+                            <span id="account-state" class="info-value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Pincode:</span>
+                            <span id="account-pincode" class="info-value">-</span>
+                        </div>
+                    </div>
+                    
+                    <div class="account-info-section">
+                        <h4>Account Information</h4>
+                        <div class="info-row">
+                            <span class="info-label">Account Created:</span>
+                            <span id="account-created" class="info-value">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Last Updated:</span>
+                            <span id="account-updated" class="info-value">-</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="account-error" class="account-error" style="display: none;">
+                    <p>Unable to load account details. Please try again.</p>
+                </div>
+            </div>
+            <div class="account-modal-footer">
+                <button class="btn-secondary" onclick="closeAccountModal()">Close</button>
+                <button class="btn-primary" onclick="logoutUser()">Logout</button>
+            </div>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-config.js"></script>
