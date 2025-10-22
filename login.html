@@ -177,7 +177,7 @@
                         <select id="su-city" required>
                             <option value="">Select city</option>
                             <option>Bengaluru</option>
-                            <option>Mysuru</option>
+                            <option>Gurmitkal</option>                            <option>Mysuru</option>
                             <option>Mangaluru</option>
                             <option>Hubballi</option>
                             <option>Belagavi</option>
@@ -211,8 +211,17 @@
                     <div class="form-group"><label for="su-state">State</label><input id="su-state" type="text" value="Karnataka" required></div>
                     <div class="form-group"><label for="su-alt">Alternate Phone</label><input id="su-alt" type="text" inputmode="numeric" maxlength="10" placeholder="10 digits" required></div>
                     <div id="pincode-status" style="font-size:.9rem; color:#666; margin-bottom: .5rem;"></div>
-                    <div id="signup-error" class="error-text">please fill all the fileds before saving</div>
-                    <button id="signup-submit" class="checkout-btn">Create Account</button>
+                    <div id="form-progress" style="margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.9rem; color: #666;">Form Progress</span>
+                            <span id="progress-text" style="font-size: 0.8rem; color: #666;">0/9 fields completed</span>
+                        </div>
+                        <div style="background: #ecf0f1; height: 6px; border-radius: 3px; overflow: hidden;">
+                            <div id="progress-bar" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
+                        </div>
+                    </div>
+                    <div id="signup-error" class="error-text">Please fill all the fields before saving</div>
+                    <button id="signup-submit" class="checkout-btn" disabled>Create Account</button>
                 </div>
                 <p id="status" style="margin-top: 1rem; color: #666; font-size: 0.9rem;"></p>
             </div>
@@ -447,6 +456,71 @@
                 su.pinStatus.textContent = '';
             }
         });
+
+        // Function to check if all fields are valid
+        function checkAllFieldsValid() {
+            const fields = [su.name, su.phone, su.email, su.address, su.landmark, su.pincode, su.city, su.state, su.alt];
+            return fields.every(field => validateField(field));
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const fields = [su.name, su.phone, su.email, su.address, su.landmark, su.pincode, su.city, su.state, su.alt];
+            const validCount = fields.filter(field => {
+                const value = field.value.trim();
+                const fieldName = field.id.replace('su-', '');
+                
+                switch(fieldName) {
+                    case 'name': return value.length >= 2;
+                    case 'phone': return value.length === 10;
+                    case 'email': return validEmail(value);
+                    case 'address': return value.length >= 10;
+                    case 'landmark': return value.length >= 3;
+                    case 'pincode': return value.length === 6;
+                    case 'city': return value !== '';
+                    case 'state': return value.length >= 2;
+                    case 'alt': return value.length === 10;
+                    default: return false;
+                }
+            }).length;
+            
+            const progressPercent = (validCount / fields.length) * 100;
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            if (progressBar && progressText) {
+                progressBar.style.width = progressPercent + '%';
+                progressText.textContent = `${validCount}/${fields.length} fields completed`;
+            }
+            
+            return validCount === fields.length;
+        }
+
+        // Update button state based on form validation
+        function updateButtonState() {
+            const allValid = updateProgress();
+            su.submit.disabled = !allValid;
+            su.submit.style.opacity = allValid ? '1' : '0.6';
+            su.submit.style.cursor = allValid ? 'pointer' : 'not-allowed';
+            
+            if (allValid) {
+                su.submit.innerHTML = '✓ Create Account';
+                su.submit.style.background = 'linear-gradient(135deg, #27ae60 0%, #2ecc71 100%)';
+            } else {
+                su.submit.innerHTML = 'Create Account';
+                su.submit.style.background = '';
+            }
+        }
+
+        // Add event listeners to update button state
+        [su.name, su.phone, su.email, su.address, su.landmark, su.pincode, su.city, su.state, su.alt].forEach(field => {
+            field.addEventListener('input', updateButtonState);
+            field.addEventListener('change', updateButtonState);
+            field.addEventListener('blur', updateButtonState);
+        });
+
+        // Initial button state
+        updateButtonState();
 
         su.submit.addEventListener('click', async () => {
             su.error.classList.remove('show');
