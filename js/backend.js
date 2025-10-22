@@ -179,6 +179,41 @@
         return { data, error };
     }
 
+    // New function for creating user accounts during signup
+    async function createUserAccount(details) {
+        const client = await getClient();
+        if (!client) return { error: 'no-client' };
+        
+        try {
+            const payload = {
+                email: details.email || null,
+                phone: details.phone || null,
+                name: details.name,
+                address: details.address,
+                pincode: details.pincode,
+                landmark: details.landmark,
+                alt_phone: details.altPhone,
+                city: details.city,
+                state: details.state
+            };
+            
+            console.log('Creating user account with payload:', payload);
+            
+            const { data, error } = await client.from('user_data').insert(payload).select().single();
+            
+            if (error) {
+                console.error('User creation error:', error);
+                return { error: error.message || 'Failed to create account' };
+            }
+            
+            console.log('User account created successfully:', data);
+            return { data, error: null };
+        } catch (e) {
+            console.error('User creation exception:', e);
+            return { error: 'Failed to create account' };
+        }
+    }
+
     async function checkPincodeDeliverable(pincode) {
         const client = await getClient();
         if (!client) {
@@ -331,6 +366,7 @@
         verifyOtp,
         upsertUserProfile,
         saveUserProfile,
+        createUserAccount,
         checkPincodeDeliverable,
         debugPincode,
         signOut,

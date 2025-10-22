@@ -345,7 +345,7 @@
                 status.innerHTML = `📱 <strong>Demo OTP: ${resp.otp}</strong><br><small style="color: #888;">This is a demo version - no real SMS sent. Check browser console for details.</small>`;
                 status.style.color = '#27ae60';
             } else {
-                status.textContent = 'OTP sent. Enter the code below.';
+            status.textContent = 'OTP sent. Enter the code below.';
             }
             
             otpInput.disabled = false;
@@ -687,9 +687,9 @@
 
             // Show loading animation
             showAccountCreationLoading();
-            
+
             // Save to DB
-            const result = await window.backend.saveUserProfile({
+            const result = await window.backend.createUserAccount({
                 name: details.name,
                 phone,
                 email: details.email,
