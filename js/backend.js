@@ -107,13 +107,12 @@
             try {
                 console.log('Verifying OTP for phone:', phone, 'with token:', token);
                 
-                // First, get the most recent OTP for this phone
+                // First, get the most recent OTP for this phone (including verified ones for debugging)
                 const { data: otpData, error: otpError } = await client
                     .from('user_otp')
                     .select('*')
                     .eq('email', phone)
                     .eq('channel', 'sms')
-                    .eq('is_verified', false)
                     .order('sent_at', { ascending: false })
                     .limit(1)
                     .maybeSingle();
@@ -126,8 +125,14 @@
                 }
                 
                 if (!otpData) {
-                    console.log('No unverified OTP found for phone:', phone);
-                    return { error: 'No OTP found for this phone number' };
+                    console.log('No OTP found for phone:', phone);
+                    return { error: 'No OTP found for this phone number. Please request a new OTP.' };
+                }
+                
+                // Check if OTP is already verified
+                if (otpData.is_verified) {
+                    console.log('OTP already verified for phone:', phone);
+                    return { error: 'This OTP has already been used. Please request a new OTP.' };
                 }
                 
                 // Check if OTP is expired
@@ -230,18 +235,26 @@
             // Check for existing users
             const existingUsers = await Promise.all(existingUserChecks);
             
+            console.log('Checking for existing users:', existingUsers);
+            
             for (const result of existingUsers) {
+                console.log('Checking result:', result);
                 if (result.data && !result.error) {
                     // User already exists
                     const existingUser = result.data;
+                    console.log('Found existing user:', existingUser);
                     if (existingUser.phone === details.phone) {
+                        console.log('Duplicate phone found:', existingUser.phone);
                         return { error: 'User with this phone number already exists. Please login.' };
                     }
                     if (existingUser.email === details.email) {
+                        console.log('Duplicate email found:', existingUser.email);
                         return { error: 'User with this email already exists. Please login.' };
                     }
                 }
             }
+            
+            console.log('No existing users found, proceeding with creation');
             
             const payload = {
                 email: details.email || null,
@@ -265,6 +278,38 @@
             }
             
             console.log('User account created successfully:', data);
+            
+            // Store address details in user_addresses table
+            try {
+                const addressRecord = {
+                    user_id: data.user_id,
+                    label: 'Default',
+                    name: details.name,
+                    phone: details.phone,
+                    address: details.address,
+                    city: details.city,
+                    pincode: details.pincode,
+                    is_default: true
+                };
+                
+                console.log('Storing address record:', addressRecord);
+                
+                const { data: addressData, error: addressError } = await client
+                    .from('user_addresses')
+                    .insert(addressRecord)
+                    .select()
+                    .single();
+                
+                if (addressError) {
+                    console.error('Address storage error:', addressError);
+                    // Don't fail the entire process if address storage fails
+                } else {
+                    console.log('Address stored successfully:', addressData);
+                }
+            } catch (addressException) {
+                console.error('Address storage exception:', addressException);
+                // Don't fail the entire process if address storage fails
+            }
             
             // Create user session for the new account
             const userSession = {

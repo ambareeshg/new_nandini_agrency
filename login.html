@@ -379,8 +379,16 @@
             if (isEmail(identifier)) {
                 resp = await window.backend.verifyOtp({ email: identifier, token });
             } else {
-                const normalized = identifier.startsWith('+') ? identifier : `+91${identifier.replace(/\D/g, '').slice(-10)}`;
-                resp = await window.backend.verifyOtp({ phone: normalized, token });
+                // Use the same normalization logic as in sendOtp
+                const normalized = identifier.replace(/\D/g, '');
+                if (normalized.length !== 10 && !/^\+?\d{12}$/.test(identifier)) {
+                    status.textContent = 'Enter valid phone: +91XXXXXXXXXX or 10 digits';
+                    status.style.color = '#e74c3c';
+                    return;
+                }
+                const phone = identifier.startsWith('+') ? identifier : `+91${normalized.slice(-10)}`;
+                console.log('Verifying OTP for phone:', phone, 'with token:', token);
+                resp = await window.backend.verifyOtp({ phone: phone, token });
             }
             
             if (resp && resp.error) {
@@ -703,7 +711,7 @@
             
             if (result && result.error) {
                 hideAccountCreationLoading();
-                su.error.textContent = 'Could not save. Try again.';
+                su.error.textContent = result.error;
                 su.error.classList.add('show');
                 return;
             }
