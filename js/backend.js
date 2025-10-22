@@ -27,6 +27,18 @@
     async function getCurrentUser() {
         const client = await getClient();
         if (!client) return null;
+        
+        // Check for custom user session (phone OTP login)
+        const customUser = localStorage.getItem('current_user');
+        if (customUser) {
+            try {
+                return JSON.parse(customUser);
+            } catch (e) {
+                localStorage.removeItem('current_user');
+            }
+        }
+        
+        // Check Supabase auth session (email OTP login)
         const { data } = await client.auth.getUser();
         return data?.user || null;
     }
@@ -34,6 +46,11 @@
     async function signOut() {
         const client = await getClient();
         if (!client) return;
+        
+        // Clear custom user session
+        localStorage.removeItem('current_user');
+        
+        // Sign out from Supabase
         await client.auth.signOut();
     }
 
@@ -51,29 +68,88 @@
         return { error };
     }
 
-    // Auth: phone OTP (requires SMS configured in Supabase project)
+    // Auth: phone OTP (custom 6-digit OTP system - demo version)
     async function requestPhoneOtp(phone) {
         const client = await getClient();
         if (!client) return { error: 'no-client' };
-        const { error } = await client.auth.signInWithOtp({ phone });
+        
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
         try {
-            await client.from('user_otp').insert({ email: phone, channel: 'sms', sent_at: new Date().toISOString() });
-        } catch (e) {}
-        return { error };
+            // Store OTP in database
+            await client.from('user_otp').insert({ 
+                email: phone, 
+                channel: 'sms', 
+                sent_at: new Date().toISOString(),
+                otp_code: otp,
+                expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString() // 5 minutes expiry
+            });
+            
+            // Demo version - log OTP to console and return it for display
+            console.log(`📱 OTP for ${phone}: ${otp}`);
+            console.log(`⏰ OTP expires in 5 minutes`);
+            console.log(`🔐 This is a demo version - no real SMS sent`);
+            
+            return { success: true, otp: otp };
+        } catch (e) {
+            console.error('OTP generation error:', e);
+            return { error: 'Failed to generate OTP' };
+        }
     }
 
     async function verifyOtp({ email, phone, token }) {
         const client = await getClient();
         if (!client) return { error: 'no-client' };
-        let result;
+        
         if (phone) {
-            result = await client.auth.verifyOtp({ phone, token, type: 'sms' });
+            // Custom OTP verification for phone
+            try {
+                const { data, error } = await client
+                    .from('user_otp')
+                    .select('*')
+                    .eq('email', phone)
+                    .eq('channel', 'sms')
+                    .eq('otp_code', token)
+                    .eq('is_verified', false)
+                    .gt('expires_at', new Date().toISOString())
+                    .order('sent_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                
+                if (error || !data) {
+                    return { error: 'Invalid or expired OTP' };
+                }
+                
+                // Mark OTP as verified
+                await client
+                    .from('user_otp')
+                    .update({ is_verified: true })
+                    .eq('id', data.id);
+                
+                // Create or get user session (simulate login)
+                const user = {
+                    id: 'temp-' + Date.now(),
+                    email: phone,
+                    phone: phone,
+                    created_at: new Date().toISOString()
+                };
+                
+                // Store user session in localStorage for demo
+                localStorage.setItem('current_user', JSON.stringify(user));
+                
+                return { data: { user }, error: null };
+            } catch (e) {
+                console.error('OTP verification error:', e);
+                return { error: 'OTP verification failed' };
+            }
         } else if (email) {
-            result = await client.auth.verifyOtp({ email, token, type: 'email' });
+            // Use Supabase's built-in email OTP verification
+            const result = await client.auth.verifyOtp({ email, token, type: 'email' });
+            return result;
         } else {
             return { error: 'no-identifier' };
         }
-        return result;
     }
 
     async function upsertUserProfile(user) {
