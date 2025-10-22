@@ -429,8 +429,47 @@
         }
         
         try {
+            // Check if user has a temporary ID and try to create a proper user record
+            let userId = user.id;
+            
+            if (userId.startsWith('temp-')) {
+                console.log('User has temporary ID, attempting to create proper user record');
+                
+                // Try to create a proper user record
+                const { data: newUser, error: createError } = await client
+                    .from('user_data')
+                    .insert({
+                        email: user.email || user.phone,
+                        phone: user.phone,
+                        name: user.name || 'User',
+                        address: null,
+                        pincode: null,
+                        landmark: null,
+                        alt_phone: null,
+                        city: null,
+                        state: null
+                    })
+                    .select()
+                    .single();
+                
+                if (createError) {
+                    console.error('Failed to create user record:', createError);
+                    return { error: 'Failed to create user record for order' };
+                }
+                
+                userId = newUser.user_id;
+                console.log('Created proper user record with ID:', userId);
+                
+                // Update the user session with the new ID
+                const updatedUser = {
+                    ...user,
+                    id: userId
+                };
+                localStorage.setItem('current_user', JSON.stringify(updatedUser));
+            }
+            
             const record = {
-                user_id: user.id,
+                user_id: userId,
                 order_id: orderPayload.id,
                 status: orderPayload.status || 'order placed', // Use the status from order payload
                 items: orderPayload.items,
@@ -461,22 +500,68 @@
         const client = await getClient();
         const user = await getCurrentUser();
         if (!client || !user) return null;
-        const record = {
-            user_id: user.id,
-            label: address.label || 'Default',
-            name: address.name,
-            phone: address.phone,
-            address: address.address,
-            city: address.city,
-            pincode: address.pincode,
-            is_default: address.is_default === true
-        };
-        const { data, error } = await client.from('user_addresses').insert(record).select().single();
-        if (error) {
-            console.error('Save address failed', error);
+        
+        try {
+            // Check if user has a temporary ID and try to create a proper user record
+            let userId = user.id;
+            
+            if (userId.startsWith('temp-')) {
+                console.log('User has temporary ID, attempting to create proper user record for address');
+                
+                // Try to create a proper user record
+                const { data: newUser, error: createError } = await client
+                    .from('user_data')
+                    .insert({
+                        email: user.email || user.phone,
+                        phone: user.phone,
+                        name: user.name || 'User',
+                        address: null,
+                        pincode: null,
+                        landmark: null,
+                        alt_phone: null,
+                        city: null,
+                        state: null
+                    })
+                    .select()
+                    .single();
+                
+                if (createError) {
+                    console.error('Failed to create user record for address:', createError);
+                    return null;
+                }
+                
+                userId = newUser.user_id;
+                console.log('Created proper user record with ID for address:', userId);
+                
+                // Update the user session with the new ID
+                const updatedUser = {
+                    ...user,
+                    id: userId
+                };
+                localStorage.setItem('current_user', JSON.stringify(updatedUser));
+            }
+            
+            const record = {
+                user_id: userId,
+                label: address.label || 'Default',
+                name: address.name,
+                phone: address.phone,
+                address: address.address,
+                city: address.city,
+                pincode: address.pincode,
+                is_default: address.is_default === true
+            };
+            
+            const { data, error } = await client.from('user_addresses').insert(record).select().single();
+            if (error) {
+                console.error('Save address failed', error);
+                return null;
+            }
+            return data;
+        } catch (e) {
+            console.error('Address save exception:', e);
             return null;
         }
-        return data;
     }
 
     async function getAddresses() {
@@ -494,10 +579,18 @@
         if (!client || !user) return { error: 'User not authenticated' };
         
         try {
+            // Check if user has a temporary ID
+            let userId = user.id;
+            
+            if (userId.startsWith('temp-')) {
+                console.log('User has temporary ID, cannot fetch orders from database');
+                return { data: [], error: null }; // Return empty array for temporary users
+            }
+            
             const { data, error } = await client
                 .from('user_orders')
                 .select('*')
-                .eq('user_id', user.id)
+                .eq('user_id', userId)
                 .order('created_at', { ascending: false });
                 
             if (error) {
@@ -519,11 +612,19 @@
         if (!client || !user) return { error: 'User not authenticated' };
         
         try {
+            // Check if user has a temporary ID
+            let userId = user.id;
+            
+            if (userId.startsWith('temp-')) {
+                console.log('User has temporary ID, cannot fetch order from database');
+                return { error: 'Order not found' }; // Return error for temporary users
+            }
+            
             const { data, error } = await client
                 .from('user_orders')
                 .select('*')
                 .eq('order_id', orderId)
-                .eq('user_id', user.id)
+                .eq('user_id', userId)
                 .single();
                 
             if (error) {
