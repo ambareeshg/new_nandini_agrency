@@ -430,7 +430,8 @@
         }
 
         function validEmail(email) {
-            return /^[\w.+-]+@([\w-]+\.)+(gmail|yahoo|outlook|hotmail|icloud|protonmail|zoho|yandex|mail)\.(com|in|net)$/i.test(email);
+            // More flexible email validation
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
         su.pincode.addEventListener('input', () => {
@@ -459,6 +460,87 @@
             updateButtonState();
         });
 
+        // Real-time validation function
+        function validateField(field) {
+            const value = field.value.trim();
+            const fieldName = field.id.replace('su-', '');
+            let isValid = false;
+            let message = '';
+
+            switch(fieldName) {
+                case 'name':
+                    isValid = value.length >= 2;
+                    message = isValid ? '✓ Valid name' : 'Name must be at least 2 characters';
+                    break;
+                case 'phone':
+                    isValid = value.length === 10;
+                    message = isValid ? '✓ Valid phone number' : 'Phone must be 10 digits';
+                    break;
+                case 'email':
+                    isValid = validEmail(value);
+                    message = isValid ? '✓ Valid email' : 'Enter a valid email address';
+                    break;
+                case 'address':
+                    isValid = value.length >= 5;
+                    message = isValid ? '✓ Valid address' : 'Address must be at least 5 characters';
+                    break;
+                case 'landmark':
+                    isValid = value.length >= 3;
+                    message = isValid ? '✓ Valid landmark' : 'Landmark must be at least 3 characters';
+                    break;
+                case 'pincode':
+                    isValid = value.length === 6;
+                    message = isValid ? '✓ Valid pincode' : 'Pincode must be 6 digits';
+                    break;
+                case 'city':
+                    isValid = value !== '';
+                    message = isValid ? '✓ City selected' : 'Please select a city';
+                    break;
+                case 'state':
+                    isValid = value.length >= 2;
+                    message = isValid ? '✓ Valid state' : 'State must be at least 2 characters';
+                    break;
+                case 'alt':
+                    isValid = value.length === 10;
+                    message = isValid ? '✓ Valid alternate phone' : 'Alternate phone must be 10 digits';
+                    break;
+            }
+
+            // Update field visual state
+            updateFieldValidation(field, isValid, message);
+            return isValid;
+        }
+
+        // Update field visual validation state
+        function updateFieldValidation(field, isValid, message) {
+            const fieldGroup = field.closest('.form-group');
+            let statusDiv = fieldGroup.querySelector('.field-status');
+            
+            if (!statusDiv) {
+                statusDiv = document.createElement('div');
+                statusDiv.className = 'field-status';
+                statusDiv.style.cssText = 'font-size: 0.8rem; margin-top: 0.25rem; transition: all 0.3s ease;';
+                fieldGroup.appendChild(statusDiv);
+            }
+
+            statusDiv.textContent = message;
+            statusDiv.style.color = isValid ? '#27ae60' : '#e74c3c';
+            
+            // Update field CSS classes and styles
+            field.classList.remove('valid', 'invalid');
+            field.classList.add(isValid ? 'valid' : 'invalid');
+            
+            // Add visual feedback
+            if (isValid) {
+                field.style.borderColor = '#27ae60';
+                field.style.boxShadow = '0 0 0 2px rgba(39, 174, 96, 0.1)';
+            } else {
+                field.style.borderColor = '#e74c3c';
+                field.style.boxShadow = '0 0 0 2px rgba(231, 76, 60, 0.1)';
+            }
+            field.style.transition = 'all 0.3s ease';
+        }
+
         // Function to check if all fields are valid
         function checkAllFieldsValid() {
             const fields = [su.name, su.phone, su.email, su.address, su.landmark, su.pincode, su.city, su.state, su.alt];
@@ -486,7 +568,7 @@
                         isValid = validEmail(value);
                         break;
                     case 'address': 
-                        isValid = value.length >= 10;
+                        isValid = value.length >= 5;
                         break;
                     case 'landmark': 
                         isValid = value.length >= 3;
@@ -539,6 +621,30 @@
                 su.submit.style.background = '';
             }
         }
+
+        // Add real-time validation to all fields
+        su.name.addEventListener('input', () => validateField(su.name));
+        su.name.addEventListener('blur', () => validateField(su.name));
+        
+        su.email.addEventListener('input', () => validateField(su.email));
+        su.email.addEventListener('blur', () => validateField(su.email));
+        
+        su.address.addEventListener('input', () => validateField(su.address));
+        su.address.addEventListener('blur', () => validateField(su.address));
+        
+        su.landmark.addEventListener('input', () => validateField(su.landmark));
+        su.landmark.addEventListener('blur', () => validateField(su.landmark));
+        
+        su.pincode.addEventListener('input', () => {
+            su.pincode.value = su.pincode.value.replace(/\D/g, '').slice(0,6);
+            validateField(su.pincode);
+        });
+        su.pincode.addEventListener('blur', () => validateField(su.pincode));
+        
+        su.city.addEventListener('change', () => validateField(su.city));
+        
+        su.state.addEventListener('input', () => validateField(su.state));
+        su.state.addEventListener('blur', () => validateField(su.state));
 
         // Add event listeners to update button state
         [su.name, su.phone, su.email, su.address, su.landmark, su.pincode, su.city, su.state, su.alt].forEach(field => {
