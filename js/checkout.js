@@ -93,7 +93,7 @@ async function placeOrder() {
             date: new Date().toISOString(),
             items: cartItems,
             total: total.toString(),
-            status: 'order placed', // Set initial status as requested
+            status: 'placed', // Use 'placed' to match database constraint
             shipping: formData
         };
         

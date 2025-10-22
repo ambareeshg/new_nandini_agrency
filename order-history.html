@@ -276,9 +276,12 @@
                     } else if (order.status === 'delivered') {
                         statusClass = 'status-delivered';
                         statusText = 'Delivered';
-                    } else if (order.status === 'order placed') {
+                    } else if (order.status === 'placed') {
                         statusClass = 'status-placed';
                         statusText = 'Order Placed';
+                    } else if (order.status === 'failed') {
+                        statusClass = 'status-failed';
+                        statusText = 'Failed';
                     }
                     
                     // Format date

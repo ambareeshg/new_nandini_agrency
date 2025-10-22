@@ -471,7 +471,7 @@
             const record = {
                 user_id: userId,
                 order_id: orderPayload.id,
-                status: orderPayload.status || 'order placed', // Use the status from order payload
+                status: orderPayload.status || 'placed', // Use 'placed' to match database constraint
                 items: orderPayload.items,
                 total: orderPayload.total,
                 shipping: orderPayload.shipping,
