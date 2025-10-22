@@ -468,12 +468,24 @@
                 localStorage.setItem('current_user', JSON.stringify(updatedUser));
             }
             
+            // Calculate order details
+            const items = orderPayload.items || [];
+            const amount = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const deliveryCharges = 50; // Fixed delivery charge
+            const totalAmount = amount + deliveryCharges;
+            const quantity = items.reduce((sum, item) => sum + item.quantity, 0);
+            
             const record = {
                 user_id: userId,
                 order_id: orderPayload.id,
                 status: orderPayload.status || 'placed', // Use 'placed' to match database constraint
                 items: orderPayload.items,
-                total: orderPayload.total,
+                amount: amount,
+                delivery_charges: deliveryCharges,
+                total_amount: totalAmount,
+                payment_status: 'Not_Paid', // Initial payment status
+                quantity: quantity,
+                total: orderPayload.total, // Keep for backward compatibility
                 shipping: orderPayload.shipping,
                 created_at: new Date().toISOString()
             };

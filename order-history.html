@@ -258,10 +258,11 @@
                         }
                     }
                     
-                    // Calculate total amount
-                    const itemsTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                    const shippingCost = 50;
-                    const totalAmount = itemsTotal + shippingCost;
+                    // Use database values if available, otherwise calculate
+                    const itemsTotal = order.amount || items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                    const shippingCost = order.delivery_charges || 50;
+                    const totalAmount = order.total_amount || (itemsTotal + shippingCost);
+                    const orderQuantity = order.quantity || items.reduce((sum, item) => sum + item.quantity, 0);
                     
                     // Determine status class and text based on database status
                     let statusClass = 'status-placed';
@@ -306,13 +307,28 @@
                                 `).join('')}
                             </div>
                             
+                            <div class="order-summary">
+                                <div class="summary-row">
+                                    <span>Items (${orderQuantity}):</span>
+                                    <span>₹${itemsTotal.toFixed(2)}</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Delivery Charges:</span>
+                                    <span>₹${shippingCost.toFixed(2)}</span>
+                                </div>
+                                <div class="summary-row total-row">
+                                    <span><strong>Total Amount:</strong></span>
+                                    <span><strong>₹${totalAmount.toFixed(2)}</strong></span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Payment Status:</span>
+                                    <span class="payment-status ${order.payment_status === 'Paid' ? 'paid' : 'not-paid'}">${order.payment_status || 'Not_Paid'}</span>
+                                </div>
+                            </div>
+                            
                             <div class="shipping-info">
                                 <p><strong>Shipping Address:</strong> ${shipping.address || 'N/A'}, ${shipping.city || 'N/A'} - ${shipping.pincode || 'N/A'}</p>
                                 <p><strong>Contact:</strong> ${shipping.phone || 'N/A'} | ${shipping.email || 'N/A'}</p>
-                            </div>
-                            
-                            <div class="order-total">
-                                Total: ₹${totalAmount.toFixed(2)}
                             </div>
                             
                             <div style="margin-top: 1rem; text-align: center;">
@@ -541,6 +557,49 @@
             background: rgba(102, 126, 234, 0.05);
             border-radius: 4px;
             padding: 2px 8px;
+        }
+        
+        .order-summary {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .summary-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .total-row {
+            border-top: 1px solid #dee2e6;
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+            font-size: 1rem;
+        }
+        
+        .payment-status {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .payment-status.paid {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .payment-status.not-paid {
+            background: #f8d7da;
+            color: #721c24;
         }
     `;
     document.head.appendChild(orderHistoryStyles);

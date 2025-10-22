@@ -104,9 +104,11 @@ async function placeOrder() {
         if (dbResult && dbResult.error) {
             console.error('Failed to save order to database:', dbResult.error);
             hideLoadingAnimation();
-            showNotification('Failed to place order. Please try again.', 'error');
+            showNotification('Failed to place order: ' + dbResult.error, 'error');
             return;
         }
+        
+        console.log('Order saved to database successfully:', dbResult);
         
         // Save order to localStorage as backup
         let orders = JSON.parse(localStorage.getItem('orders')) || [];
@@ -142,6 +144,11 @@ async function placeOrder() {
         setTimeout(() => {
             hideLoadingAnimation();
             showOrderSuccessAnimation(orderId);
+            
+            // Redirect to order history after animation
+            setTimeout(() => {
+                window.location.href = 'order-history.html';
+            }, 3000);
         }, 2000);
         
     } catch (error) {

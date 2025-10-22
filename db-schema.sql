@@ -49,7 +49,12 @@ create table if not exists user_orders (
   order_id text unique not null,
   status text not null check (status in ('failed','processing','placed','delivered')),
   items jsonb not null,
-  total text,
+  amount numeric not null default 0, -- Amount excluding delivery charges
+  delivery_charges numeric not null default 0, -- Delivery charges
+  total_amount numeric not null default 0, -- Total amount including delivery charges
+  payment_status text not null default 'Not_Paid' check (payment_status in ('Not_Paid','Paid','Failed','Refunded')),
+  quantity int not null default 0, -- Total quantity of items
+  total text, -- Keep for backward compatibility
   shipping jsonb,
   created_at timestamp with time zone default now(),
   date_created timestamp with time zone default now(),
@@ -153,4 +158,27 @@ create trigger update_pincode_status_date_modified before update on pincode_stat
 -- ALTER TABLE user_data ALTER COLUMN user_id SET DEFAULT nextval('user_data_id_seq');
 -- ALTER TABLE user_data ALTER COLUMN user_id SET NOT NULL;
 -- ALTER TABLE user_data ADD CONSTRAINT user_data_user_id_key UNIQUE (user_id);
+
+-- Update existing user_orders table to add new columns
+-- Run these commands in Supabase SQL Editor if the table already exists:
+
+-- Add new columns to user_orders table
+-- ALTER TABLE user_orders ADD COLUMN IF NOT EXISTS amount numeric DEFAULT 0;
+-- ALTER TABLE user_orders ADD COLUMN IF NOT EXISTS delivery_charges numeric DEFAULT 0;
+-- ALTER TABLE user_orders ADD COLUMN IF NOT EXISTS total_amount numeric DEFAULT 0;
+-- ALTER TABLE user_orders ADD COLUMN IF NOT EXISTS payment_status text DEFAULT 'Not_Paid';
+-- ALTER TABLE user_orders ADD COLUMN IF NOT EXISTS quantity int DEFAULT 0;
+
+-- Add constraints for new columns
+-- ALTER TABLE user_orders ADD CONSTRAINT IF NOT EXISTS user_orders_payment_status_check 
+--     CHECK (payment_status IN ('Not_Paid', 'Paid', 'Failed', 'Refunded'));
+
+-- Update existing records to have proper values
+-- UPDATE user_orders SET 
+--     amount = COALESCE(amount, 0),
+--     delivery_charges = COALESCE(delivery_charges, 50),
+--     total_amount = COALESCE(total_amount, 0),
+--     payment_status = COALESCE(payment_status, 'Not_Paid'),
+--     quantity = COALESCE(quantity, 0)
+-- WHERE amount IS NULL OR delivery_charges IS NULL OR total_amount IS NULL OR payment_status IS NULL OR quantity IS NULL;
 
