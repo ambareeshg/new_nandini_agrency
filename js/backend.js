@@ -423,24 +423,37 @@
     async function createOrder(orderPayload) {
         const client = await getClient();
         const user = await getCurrentUser();
-        if (!client || !user) return null;
-        const record = {
-            user_id: user.id,
-            order_id: orderPayload.id,
-            status: 'processing',
-            items: orderPayload.items,
-            total: orderPayload.total,
-            shipping: orderPayload.shipping,
-            created_at: new Date().toISOString()
-        };
-        const { data, error } = await client.from('user_orders').insert(record).select().single();
-        if (error) {
-            console.error('Create order failed', error);
-            return null;
+        if (!client || !user) {
+            console.error('No client or user for order creation');
+            return { error: 'User not authenticated' };
         }
-        // Update to placed after insert to reflect success path
-        await client.from('user_orders').update({ status: 'placed' }).eq('id', data.id);
-        return data;
+        
+        try {
+            const record = {
+                user_id: user.id,
+                order_id: orderPayload.id,
+                status: orderPayload.status || 'order placed', // Use the status from order payload
+                items: orderPayload.items,
+                total: orderPayload.total,
+                shipping: orderPayload.shipping,
+                created_at: new Date().toISOString()
+            };
+            
+            console.log('Creating order record:', record);
+            
+            const { data, error } = await client.from('user_orders').insert(record).select().single();
+            
+            if (error) {
+                console.error('Create order failed', error);
+                return { error: error.message || 'Failed to create order' };
+            }
+            
+            console.log('Order created successfully:', data);
+            return { data, error: null };
+        } catch (e) {
+            console.error('Order creation exception:', e);
+            return { error: 'Failed to create order' };
+        }
     }
 
     // Addresses
@@ -472,6 +485,57 @@
         if (!client || !user) return [];
         const { data } = await client.from('user_addresses').select('*').eq('user_id', user.id).order('is_default', { ascending: false }).order('created_at', { ascending: false });
         return data || [];
+    }
+
+    // Get user orders
+    async function getUserOrders() {
+        const client = await getClient();
+        const user = await getCurrentUser();
+        if (!client || !user) return { error: 'User not authenticated' };
+        
+        try {
+            const { data, error } = await client
+                .from('user_orders')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+                
+            if (error) {
+                console.error('Error fetching user orders:', error);
+                return { error: 'Failed to fetch orders' };
+            }
+            
+            return { data: data || [], error: null };
+        } catch (e) {
+            console.error('Error in getUserOrders:', e);
+            return { error: 'Failed to fetch orders' };
+        }
+    }
+
+    // Get order by order ID
+    async function getOrderByOrderId(orderId) {
+        const client = await getClient();
+        const user = await getCurrentUser();
+        if (!client || !user) return { error: 'User not authenticated' };
+        
+        try {
+            const { data, error } = await client
+                .from('user_orders')
+                .select('*')
+                .eq('order_id', orderId)
+                .eq('user_id', user.id)
+                .single();
+                
+            if (error) {
+                console.error('Error fetching order:', error);
+                return { error: 'Order not found' };
+            }
+            
+            return { data, error: null };
+        } catch (e) {
+            console.error('Error in getOrderByOrderId:', e);
+            return { error: 'Order not found' };
+        }
     }
 
     // Admin utilities
@@ -572,6 +636,10 @@
         syncCartItem,
         clearUserCart,
         createOrder,
+        getUserOrders,
+        getOrderByOrderId,
+        saveAddress,
+        getAddresses,
         adminFetchUsers,
         adminFetchOrders,
         adminUpdateOrderStatus

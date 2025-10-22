@@ -197,7 +197,7 @@
             if (cartCount) cartCount.textContent = totalItems;
         }
 
-        function trackOrder() {
+        async function trackOrder() {
             const orderId = document.getElementById('order-id').value.trim().toUpperCase();
             const trackingInfo = document.getElementById('tracking-info');
             const noOrderFound = document.getElementById('no-order-found');
@@ -213,27 +213,105 @@
                 return;
             }
             
-            // Check if it's a sample order
-            if (sampleOrders[orderId]) {
-                const order = sampleOrders[orderId];
-                displayOrderTracking(orderId, order);
-                trackingInfo.style.display = 'block';
-            } 
-            // Check if it's an order from localStorage
-            else if (checkLocalStorageOrder(orderId)) {
-                const order = getOrderFromLocalStorage(orderId);
-                displayOrderTracking(orderId, order);
-                trackingInfo.style.display = 'block';
-            }
-            else {
-                noOrderFound.style.display = 'block';
-                loadRecentOrders(); // Show recent orders if available
+            console.log('Tracking order:', orderId);
+            
+            try {
+                // First try to get order from database
+                const result = await window.backend.getOrderByOrderId(orderId);
+                
+                if (result.error) {
+                    console.log('Order not found in database:', result.error);
+                    // Fallback to sample orders or localStorage
+                    if (sampleOrders[orderId]) {
+                        const order = sampleOrders[orderId];
+                        displayOrderTracking(orderId, order);
+                        trackingInfo.style.display = 'block';
+                    } else if (checkLocalStorageOrder(orderId)) {
+                        const order = getOrderFromLocalStorage(orderId);
+                        displayOrderTracking(orderId, order);
+                        trackingInfo.style.display = 'block';
+                    } else {
+                        noOrderFound.style.display = 'block';
+                        loadRecentOrders();
+                    }
+                } else {
+                    // Order found in database
+                    const order = result.data;
+                    console.log('Order found in database:', order);
+                    
+                    // Convert database order to tracking format
+                    const trackingOrder = convertDatabaseOrderToTracking(order);
+                    displayOrderTracking(orderId, trackingOrder);
+                    trackingInfo.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error tracking order:', error);
+                // Fallback to sample orders or localStorage
+                if (sampleOrders[orderId]) {
+                    const order = sampleOrders[orderId];
+                    displayOrderTracking(orderId, order);
+                    trackingInfo.style.display = 'block';
+                } else if (checkLocalStorageOrder(orderId)) {
+                    const order = getOrderFromLocalStorage(orderId);
+                    displayOrderTracking(orderId, order);
+                    trackingInfo.style.display = 'block';
+                } else {
+                    noOrderFound.style.display = 'block';
+                    loadRecentOrders();
+                }
             }
             
             // Scroll to results
             if (trackingInfo.style.display === 'block' || noOrderFound.style.display === 'block') {
                 trackingInfo.scrollIntoView({ behavior: 'smooth' });
             }
+        }
+        
+        function convertDatabaseOrderToTracking(dbOrder) {
+            // Parse items and shipping if they're JSON strings
+            let items = dbOrder.items;
+            if (typeof items === 'string') {
+                try {
+                    items = JSON.parse(items);
+                } catch (e) {
+                    items = [];
+                }
+            }
+            
+            let shipping = dbOrder.shipping;
+            if (typeof shipping === 'string') {
+                try {
+                    shipping = JSON.parse(shipping);
+                } catch (e) {
+                    shipping = {};
+                }
+            }
+            
+            // Determine progress based on status
+            let progress = 1;
+            if (dbOrder.status === 'order placed') progress = 1;
+            else if (dbOrder.status === 'processing') progress = 3;
+            else if (dbOrder.status === 'shipped') progress = 4;
+            else if (dbOrder.status === 'delivered') progress = 5;
+            
+            // Calculate estimated delivery
+            const orderDate = new Date(dbOrder.created_at);
+            const deliveryDate = new Date(orderDate);
+            deliveryDate.setDate(deliveryDate.getDate() + 3); // 3 days delivery
+            
+            return {
+                status: dbOrder.status,
+                progress: progress,
+                estimatedDelivery: deliveryDate.toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                }),
+                lastUpdated: new Date(dbOrder.date_modified || dbOrder.created_at).toLocaleString(),
+                shippingAddress: `${shipping.address || 'N/A'}, ${shipping.city || 'N/A'} - ${shipping.pincode || 'N/A'}`,
+                contact: `${shipping.name || 'N/A'} - ${shipping.phone || 'N/A'}`
+            };
         }
 
         function checkLocalStorageOrder(orderId) {

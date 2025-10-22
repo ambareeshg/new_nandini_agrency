@@ -195,55 +195,165 @@
             cartCount.textContent = totalItems;
         }
 
-        function loadOrderHistory() {
+        async function loadOrderHistory() {
             const ordersList = document.getElementById('orders-list');
             const noOrders = document.getElementById('no-orders');
             
-            // Debug: Log what's in localStorage
-            console.log('Loading order history...');
-            const ordersData = localStorage.getItem('orders');
-            console.log('Raw orders data:', ordersData);
+            console.log('Loading order history from database...');
             
+            try {
+                // Load orders from database
+                const result = await window.backend.getUserOrders();
+                
+                if (result.error) {
+                    console.error('Error loading orders:', result.error);
+                    // Fallback to localStorage
+                    loadOrderHistoryFromLocalStorage();
+                    return;
+                }
+                
+                const orders = result.data || [];
+                console.log('Orders from database:', orders);
+                
+                if (orders.length === 0) {
+                    noOrders.style.display = 'block';
+                    // Animate no orders message
+                    noOrders.style.opacity = '0';
+                    noOrders.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        noOrders.style.transition = 'all 0.6s ease-out';
+                        noOrders.style.opacity = '1';
+                        noOrders.style.transform = 'translateY(0)';
+                    }, 100);
+                    return;
+                }
+                
+                noOrders.style.display = 'none';
+                
+                // Sort orders by date (newest first)
+                orders.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                
+                ordersList.innerHTML = orders.map(order => {
+                    console.log('Processing order:', order);
+                    
+                    // Parse items if they're stored as JSON string
+                    let items = order.items;
+                    if (typeof items === 'string') {
+                        try {
+                            items = JSON.parse(items);
+                        } catch (e) {
+                            console.error('Error parsing items:', e);
+                            items = [];
+                        }
+                    }
+                    
+                    // Parse shipping if it's stored as JSON string
+                    let shipping = order.shipping;
+                    if (typeof shipping === 'string') {
+                        try {
+                            shipping = JSON.parse(shipping);
+                        } catch (e) {
+                            console.error('Error parsing shipping:', e);
+                            shipping = {};
+                        }
+                    }
+                    
+                    // Calculate total amount
+                    const itemsTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+                    const shippingCost = 50;
+                    const totalAmount = itemsTotal + shippingCost;
+                    
+                    // Determine status class and text based on database status
+                    let statusClass = 'status-placed';
+                    let statusText = 'Order Placed';
+                    
+                    if (order.status === 'processing') {
+                        statusClass = 'status-processing';
+                        statusText = 'Processing';
+                    } else if (order.status === 'shipped') {
+                        statusClass = 'status-shipped';
+                        statusText = 'Shipped';
+                    } else if (order.status === 'delivered') {
+                        statusClass = 'status-delivered';
+                        statusText = 'Delivered';
+                    } else if (order.status === 'order placed') {
+                        statusClass = 'status-placed';
+                        statusText = 'Order Placed';
+                    }
+                    
+                    // Format date
+                    const orderDate = new Date(order.created_at).toLocaleDateString();
+                    
+                    return `
+                        <div class="order-card">
+                            <div class="order-header">
+                                <div>
+                                    <span class="order-id">Order #${order.order_id}</span>
+                                    <span class="order-date">Placed on ${orderDate}</span>
+                                </div>
+                                <span class="order-status ${statusClass}">${statusText}</span>
+                            </div>
+                            
+                            <div class="order-items">
+                                ${items.map(item => `
+                                    <div class="order-item">
+                                        <span>${item.name}${item.packagingInfo ? ` (${item.packagingInfo.description})` : ''} x ${item.quantity}</span>
+                                        <span>₹${(item.price * item.quantity).toFixed(2)}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            
+                            <div class="shipping-info">
+                                <p><strong>Shipping Address:</strong> ${shipping.address || 'N/A'}, ${shipping.city || 'N/A'} - ${shipping.pincode || 'N/A'}</p>
+                                <p><strong>Contact:</strong> ${shipping.phone || 'N/A'} | ${shipping.email || 'N/A'}</p>
+                            </div>
+                            
+                            <div class="order-total">
+                                Total: ₹${totalAmount.toFixed(2)}
+                            </div>
+                            
+                            <div style="margin-top: 1rem; text-align: center;">
+                                <button onclick="trackOrderById('${order.order_id}')" class="track-order-btn">Track This Order</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Re-setup animations for new cards
+                setTimeout(() => {
+                    setupOrderHistoryAnimations();
+                }, 100);
+                
+            } catch (error) {
+                console.error('Error loading order history:', error);
+                // Fallback to localStorage
+                loadOrderHistoryFromLocalStorage();
+            }
+        }
+        
+        // Fallback function to load from localStorage
+        function loadOrderHistoryFromLocalStorage() {
+            const ordersList = document.getElementById('orders-list');
+            const noOrders = document.getElementById('no-orders');
+            
+            console.log('Loading order history from localStorage...');
+            const ordersData = localStorage.getItem('orders');
             const orders = JSON.parse(ordersData) || [];
-            console.log('Parsed orders:', orders);
             
             if (orders.length === 0) {
                 noOrders.style.display = 'block';
-                // Animate no orders message
-                noOrders.style.opacity = '0';
-                noOrders.style.transform = 'translateY(20px)';
-                setTimeout(() => {
-                    noOrders.style.transition = 'all 0.6s ease-out';
-                    noOrders.style.opacity = '1';
-                    noOrders.style.transform = 'translateY(0)';
-                }, 100);
                 return;
             }
             
             noOrders.style.display = 'none';
-            
-            // Sort orders by date (newest first)
             orders.sort((a, b) => new Date(b.date) - new Date(a.date));
             
             ordersList.innerHTML = orders.map(order => {
-                console.log('Processing order:', order);
-                
-                // Calculate total amount
                 const itemsTotal = order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-                const shipping = 50;
-                const totalAmount = itemsTotal + shipping;
+                const totalAmount = itemsTotal + 50;
                 
-                // Determine status class and text
-                let statusClass = 'status-confirmed';
-                let statusText = 'Confirmed';
-                
-                if (order.status === 'shipped') {
-                    statusClass = 'status-shipped';
-                    statusText = 'Shipped';
-                } else if (order.status === 'delivered') {
-                    statusClass = 'status-delivered';
-                    statusText = 'Delivered';
-                }
+                let statusClass = 'status-placed';
+                let statusText = 'Order Placed';
                 
                 return `
                     <div class="order-card">
@@ -254,36 +364,21 @@
                             </div>
                             <span class="order-status ${statusClass}">${statusText}</span>
                         </div>
-                        
                         <div class="order-items">
                             ${order.items.map(item => `
                                 <div class="order-item">
-                                    <span>${item.name}${item.packagingInfo ? ` (${item.packagingInfo.description})` : ''} x ${item.quantity}</span>
+                                    <span>${item.name} x ${item.quantity}</span>
                                     <span>₹${(item.price * item.quantity).toFixed(2)}</span>
                                 </div>
                             `).join('')}
                         </div>
-                        
-                        <div class="shipping-info">
-                            <p><strong>Shipping Address:</strong> ${order.shipping.address}, ${order.shipping.city} - ${order.shipping.pincode}</p>
-                            <p><strong>Contact:</strong> ${order.shipping.phone} | ${order.shipping.email}</p>
-                        </div>
-                        
-                        <div class="order-total">
-                            Total: ₹${totalAmount.toFixed(2)}
-                        </div>
-                        
+                        <div class="order-total">Total: ₹${totalAmount.toFixed(2)}</div>
                         <div style="margin-top: 1rem; text-align: center;">
                             <button onclick="trackOrderById('${order.id}')" class="track-order-btn">Track This Order</button>
                         </div>
                     </div>
                 `;
             }).join('');
-
-            // Re-setup animations for new cards
-            setTimeout(() => {
-                setupOrderHistoryAnimations();
-            }, 100);
         }
 
         function trackOrderById(orderId) {

@@ -57,58 +57,98 @@ async function placeOrder() {
         address: document.getElementById('address').value,
         city: document.getElementById('city').value,
         pincode: document.getElementById('pincode').value,
-        payment: document.querySelector('input[name="payment"]:checked').value
+        payment: document.querySelector('input[name="payment"]:checked')?.value
     };
     
-    // Generate order ID
-    const orderId = 'NP' + Date.now();
+    // Validate form
+    if (!validateForm(formData)) {
+        return;
+    }
     
-    // Get cart items
-    const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
-    console.log('Cart items for order:', cartItems);
+    // Show loading animation
+    showLoadingAnimation();
     
-    // Save address to DB (best-effort)
-    try { await window.backend.saveAddress({
-        label: 'Default',
-        name: formData.name,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        pincode: formData.pincode,
-        is_default: true
-    }); } catch (e) {}
-
-    // Save order to localStorage
-    const order = {
-        id: orderId,
-        date: new Date().toLocaleDateString(),
-        items: cartItems,
-        total: document.getElementById('checkout-total').textContent,
-        status: 'processing',
-        shipping: formData
-    };
-    
-    console.log('Creating order:', order);
-    
-    let orders = JSON.parse(localStorage.getItem('orders')) || [];
-    orders.push(order);
-    localStorage.setItem('orders', JSON.stringify(orders));
-    
-    console.log('Orders after adding new order:', orders);
-    
-    // Clear cart
-    localStorage.removeItem('cart');
-    // Persist to DB
-    try { await window.backend.createOrder(order); } catch (e) {}
-    try { await window.backend.clearUserCart(); } catch (e) {}
-    
-    // Show success animation
-    showOrderSuccessAnimation(orderId);
-    
-    // Redirect after animation
-    setTimeout(() => {
-        window.location.href = 'order-history.html';
-    }, 3000);
+    try {
+        // Generate unique order ID
+        const orderId = 'NP' + Date.now() + Math.floor(Math.random() * 1000);
+        
+        // Get cart items
+        const cartItems = JSON.parse(localStorage.getItem('cart')) || [];
+        console.log('Cart items for order:', cartItems);
+        
+        if (cartItems.length === 0) {
+            hideLoadingAnimation();
+            showNotification('Your cart is empty!', 'error');
+            return;
+        }
+        
+        // Calculate totals
+        const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const shipping = 50;
+        const total = subtotal + shipping;
+        
+        // Create order object
+        const order = {
+            id: orderId,
+            date: new Date().toISOString(),
+            items: cartItems,
+            total: total.toString(),
+            status: 'order placed', // Set initial status as requested
+            shipping: formData
+        };
+        
+        console.log('Creating order:', order);
+        
+        // Save order to database first
+        const dbResult = await window.backend.createOrder(order);
+        if (dbResult && dbResult.error) {
+            console.error('Failed to save order to database:', dbResult.error);
+            hideLoadingAnimation();
+            showNotification('Failed to place order. Please try again.', 'error');
+            return;
+        }
+        
+        // Save order to localStorage as backup
+        let orders = JSON.parse(localStorage.getItem('orders')) || [];
+        orders.push(order);
+        localStorage.setItem('orders', JSON.stringify(orders));
+        
+        // Save address to DB (best-effort)
+        try { 
+            await window.backend.saveAddress({
+                label: 'Default',
+                name: formData.name,
+                phone: formData.phone,
+                address: formData.address,
+                city: formData.city,
+                pincode: formData.pincode,
+                is_default: true
+            }); 
+        } catch (e) {
+            console.log('Address save failed, but order was placed:', e);
+        }
+        
+        // Clear cart
+        localStorage.removeItem('cart');
+        try { 
+            await window.backend.clearUserCart(); 
+        } catch (e) {
+            console.log('Cart clear failed:', e);
+        }
+        
+        console.log('Order placed successfully:', orderId);
+        
+        // Show success animation
+        setTimeout(() => {
+            hideLoadingAnimation();
+            showOrderSuccessAnimation(orderId);
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Order placement error:', error);
+        hideLoadingAnimation();
+        showNotification('Failed to place order. Please try again.', 'error');
+    }
 }
 
 // Checkout animations and interactions
@@ -181,52 +221,6 @@ function setupMobileMenu() {
     }
 }
 
-// Enhanced place order with animations
-function placeOrder() {
-    const formData = {
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        address: document.getElementById('address').value,
-        city: document.getElementById('city').value,
-        pincode: document.getElementById('pincode').value,
-        payment: document.querySelector('input[name="payment"]:checked')?.value
-    };
-    
-    // Validate form
-    if (!validateForm(formData)) {
-        return;
-    }
-    
-    // Show loading animation
-    showLoadingAnimation();
-    
-    // Generate order ID
-    const orderId = 'NP' + Date.now();
-    
-    // Save order to localStorage
-    const order = {
-        id: orderId,
-        date: new Date().toLocaleDateString(),
-        items: JSON.parse(localStorage.getItem('cart')) || [],
-        total: document.getElementById('checkout-total').textContent,
-        status: 'confirmed',
-        shipping: formData
-    };
-    
-    let orders = JSON.parse(localStorage.getItem('orders')) || [];
-    orders.push(order);
-    localStorage.setItem('orders', JSON.stringify(orders));
-    
-    // Clear cart
-    localStorage.removeItem('cart');
-    
-    // Show success animation
-    setTimeout(() => {
-        hideLoadingAnimation();
-        showOrderSuccessAnimation(orderId);
-    }, 2000);
-}
 
 function validateForm(formData) {
     const requiredFields = ['name', 'email', 'phone', 'address', 'city', 'pincode'];
