@@ -64,6 +64,7 @@ alter table user_otp enable row level security;
 alter table user_cart enable row level security;
 alter table user_orders enable row level security;
 alter table user_addresses enable row level security;
+alter table pincode_status enable row level security;
 
 create policy "user can view own profile" on user_data for select using (auth.uid() = user_id);
 create policy "upsert own profile" on user_data for insert with check (auth.uid() = user_id);
@@ -85,4 +86,7 @@ create table if not exists pincode_status (
 
 
 create policy "manage own addresses" on user_addresses for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+
+-- Pincode status policies
+create policy "anyone can read pincode status" on pincode_status for select using (true);
 

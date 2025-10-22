@@ -105,9 +105,25 @@
 
     async function checkPincodeDeliverable(pincode) {
         const client = await getClient();
-        if (!client) return { deliverable: false };
-        const { data } = await client.from('pincode_status').select('status').eq('pincode', pincode).maybeSingle();
-        return { deliverable: data ? data.status === 1 : false };
+        if (!client) {
+            console.warn('No Supabase client available');
+            return { deliverable: false };
+        }
+        
+        try {
+            const { data, error } = await client.from('pincode_status').select('status').eq('pincode', pincode).maybeSingle();
+            
+            if (error) {
+                console.error('Pincode check error:', error);
+                return { deliverable: false };
+            }
+            
+            console.log(`Pincode ${pincode} check result:`, data);
+            return { deliverable: data ? data.status === 1 : false };
+        } catch (err) {
+            console.error('Pincode check exception:', err);
+            return { deliverable: false };
+        }
     }
 
     // Cart persistence
