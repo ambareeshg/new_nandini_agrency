@@ -84,6 +84,9 @@ create policy "upsert own profile" on user_data for insert with check (auth.uid(
 create policy "upsert own profile update" on user_data for update using (auth.uid() = user_id);
 
 create policy "log otp any" on user_otp for insert with check (true);
+create policy "read otp any" on user_otp for select using (true);
+create policy "update otp any" on user_otp for update using (true);
+create policy "delete otp any" on user_otp for delete using (true);
 
 create policy "manage own cart" on user_cart for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
