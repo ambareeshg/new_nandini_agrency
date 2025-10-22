@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Nandini Pharma</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h2>Admin - Nandini Pharma</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="products.html" class="nav-link">Products</a></li>
+                    <li><a href="order-history.html" class="nav-link">Order History</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="admin-page">
+        <div class="container">
+            <h1>Admin Dashboard</h1>
+            <p style="text-align:center;color:#666;margin-bottom:2rem">View users and orders</p>
+
+            <div style="text-align:center;margin-bottom:1rem" id="admin-auth">
+                <span id="admin-user"></span>
+                <a href="#" id="admin-logout" style="display:none">Logout</a>
+            </div>
+
+            <div class="admin-grid" style="display:grid;grid-template-columns:1fr 2fr;gap:1.5rem">
+                <div class="card" style="background:white;padding:1rem;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.06)">
+                    <h3>Users</h3>
+                    <div id="users-list" style="max-height:60vh;overflow:auto"></div>
+                </div>
+                <div class="card" style="background:white;padding:1rem;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,0.06)">
+                    <h3>Orders</h3>
+                    <div id="orders-list" style="max-height:60vh;overflow:auto"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #34495e;">
+                <p>&copy; 2024 Nandini Pharma. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/backend.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        const adminUser = document.getElementById('admin-user');
+        const adminLogout = document.getElementById('admin-logout');
+
+        const user = await window.backend.getCurrentUser();
+        if (!user) {
+            window.location.href = 'login.html';
+            return;
+        }
+        adminUser.textContent = user.email;
+        adminLogout.style.display = 'inline-block';
+        adminLogout.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await window.backend.signOut();
+            location.href = 'login.html';
+        });
+
+        const users = await window.backend.adminFetchUsers();
+        document.getElementById('users-list').innerHTML = users.map(u => `
+            <div style="padding:.5rem;border-bottom:1px solid #eee">
+                <div><strong>${u.email || ''}</strong></div>
+                <div style="font-size:.85rem;color:#666">ID: ${u.user_id}</div>
+                <div style="font-size:.85rem;color:#666">Joined: ${new Date(u.created_at).toLocaleString()}</div>
+            </div>
+        `).join('') || '<p>No users.</p>';
+
+        const orders = await window.backend.adminFetchOrders();
+        document.getElementById('orders-list').innerHTML = orders.map(o => `
+            <div style="padding:.75rem;border-bottom:1px solid #eee">
+                <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+                    <div>
+                        <div><strong>Order ${o.order_id}</strong> — <span style="text-transform:capitalize">${o.status}</span></div>
+                        <div style="font-size:.85rem;color:#666">User: ${o.user_id} • ${new Date(o.created_at).toLocaleString()}</div>
+                        <div style="font-size:.85rem;color:#666">Total: ${o.total}</div>
+                    </div>
+                    <div>
+                        <select onchange="updateStatus('${o.order_id}', this.value)">
+                            <option value="failed" ${o.status==='failed'?'selected':''}>failed</option>
+                            <option value="processing" ${o.status==='processing'?'selected':''}>processing</option>
+                            <option value="placed" ${o.status==='placed'?'selected':''}>placed</option>
+                            <option value="delivered" ${o.status==='delivered'?'selected':''}>delivered</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        `).join('') || '<p>No orders.</p>';
+    });
+
+    async function updateStatus(orderId, status) {
+        await window.backend.adminUpdateOrderStatus(orderId, status);
+        // Basic feedback
+        alert('Status updated');
+    }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Order - Nandini Pharma</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="page-ornament left"></div>
+    <div class="page-ornament right"></div>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <span class="brand-logo" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 12c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <h2>New Nandini Medical &amp; Agency</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="products.html" class="nav-link">Products</a></li>
+                    <li><a href="cart.html" class="nav-link">Cart (<span id="cart-count">0</span>)</a></li>
+                    <li><a href="track-order.html" class="nav-link active">Track Order</a></li>
+                    <li><a href="order-history.html" class="nav-link">Order History</a></li>
+                    <li><a href="login.html" class="nav-link">Login</a></li>
+                    <li><a href="admin.html" class="nav-link">Admin</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="track-order-page">
+        <div class="container">
+            <h1>Track Your Order</h1>
+            <p style="text-align: center; margin-bottom: 3rem; color: #666;">Enter your order ID to track your package</p>
+            
+            <div class="track-order-container">
+                <div class="track-form">
+                    <input type="text" id="order-id" placeholder="Enter your Order ID (e.g., NP123456)">
+                    <button onclick="trackOrder()">Track Order</button>
+                </div>
+                
+                <div class="tracking-info" id="tracking-info" style="display: none;">
+                    <h3>Order Status</h3>
+                    <div class="tracking-steps">
+                        <div class="step completed" id="step-ordered">
+                            <span class="step-number">1</span>
+                            <span class="step-label">Order Placed</span>
+                        </div>
+                        <div class="step" id="step-confirmed">
+                            <span class="step-number">2</span>
+                            <span class="step-label">Confirmed</span>
+                        </div>
+                        <div class="step" id="step-processed">
+                            <span class="step-number">3</span>
+                            <span class="step-label">Processing</span>
+                        </div>
+                        <div class="step" id="step-shipped">
+                            <span class="step-number">4</span>
+                            <span class="step-label">Shipped</span>
+                        </div>
+                        <div class="step" id="step-delivered">
+                            <span class="step-number">5</span>
+                            <span class="step-label">Delivered</span>
+                        </div>
+                    </div>
+                    
+                    <div class="order-details">
+                        <h4>Order Details</h4>
+                        <p><strong>Order ID:</strong> <span id="track-order-id"></span></p>
+                        <p><strong>Status:</strong> <span id="track-status" style="font-weight: bold; color: #e74c3c;"></span></p>
+                        <p><strong>Estimated Delivery:</strong> <span id="track-delivery"></span></p>
+                        <p><strong>Last Updated:</strong> <span id="track-updated"></span></p>
+                    </div>
+                    
+                    <div class="shipping-info" id="shipping-info" style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee;">
+                        <h4>Shipping Information</h4>
+                        <p id="shipping-address"></p>
+                        <p id="shipping-contact"></p>
+                    </div>
+                </div>
+                
+                <div class="no-order-found" id="no-order-found" style="display: none; text-align: center; padding: 3rem; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <h3>Order Not Found</h3>
+                    <p>We couldn't find an order with the provided ID.</p>
+                    <p>Please check your order ID and try again, or <a href="order-history.html">view your order history</a>.</p>
+                </div>
+            </div>
+            
+            <div class="recent-orders" id="recent-orders" style="margin-top: 4rem; display: none;">
+                <h3 style="text-align: center; margin-bottom: 2rem;">Your Recent Orders</h3>
+                <div id="recent-orders-list">
+                    <!-- Recent orders will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>New Nandini Medical and Agency</h3>
+                    <p>Your trusted partner in healthcare</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="track-order.html">Track Order</a></li>
+                        <li><a href="order-history.html">Order History</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <p>📧 Email: info@nandinipharma.com</p>
+                    <p>📞 Phone: +1 234 567 890</p>
+                    <p>🏢 Address: 123 Medical Street, Healthcare City</p>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #34495e;">
+                <p>&copy; 2024 New Nandini Medical &amp; Agency. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/backend.js"></script>
+    <script>
+        // Sample order data for demonstration
+        const sampleOrders = {
+            'NP123456': {
+                status: 'shipped',
+                progress: 3, // 1=ordered, 2=confirmed, 3=processing, 4=shipped, 5=delivered
+                estimatedDelivery: 'December 28, 2024',
+                lastUpdated: 'December 22, 2024, 10:30 AM',
+                shippingAddress: '123 Main Street, Apt 4B, Mumbai - 400001',
+                contact: 'John Doe - +91 98765 43210'
+            },
+            'NP123457': {
+                status: 'processing',
+                progress: 2,
+                estimatedDelivery: 'December 30, 2024',
+                lastUpdated: 'December 21, 2024, 03:15 PM',
+                shippingAddress: '456 Park Avenue, Delhi - 110001',
+                contact: 'Jane Smith - +91 87654 32109'
+            },
+            'NP123458': {
+                status: 'delivered',
+                progress: 5,
+                estimatedDelivery: 'Delivered on December 20, 2024',
+                lastUpdated: 'December 20, 2024, 02:45 PM',
+                shippingAddress: '789 MG Road, Bangalore - 560001',
+                contact: 'Robert Brown - +91 76543 21098'
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCartCount();
+            loadRecentOrders();
+            setupTrackOrderAnimations();
+            setupMobileMenu();
+            
+            // Check if there's a pre-filled order ID from order history
+            const preFilledOrderId = localStorage.getItem('trackOrderId');
+            if (preFilledOrderId) {
+                document.getElementById('order-id').value = preFilledOrderId;
+                trackOrder(); // Auto-track the order
+                localStorage.removeItem('trackOrderId'); // Clear the stored ID
+            }
+            
+            // Allow pressing Enter to track order
+            document.getElementById('order-id').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    trackOrder();
+                }
+            });
+        });
+
+        function updateCartCount() {
+            const cartCount = document.getElementById('cart-count');
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            if (cartCount) cartCount.textContent = totalItems;
+        }
+
+        function trackOrder() {
+            const orderId = document.getElementById('order-id').value.trim().toUpperCase();
+            const trackingInfo = document.getElementById('tracking-info');
+            const noOrderFound = document.getElementById('no-order-found');
+            const recentOrders = document.getElementById('recent-orders');
+            
+            // Hide both sections first
+            trackingInfo.style.display = 'none';
+            noOrderFound.style.display = 'none';
+            recentOrders.style.display = 'none';
+            
+            if (!orderId) {
+                alert('Please enter an order ID');
+                return;
+            }
+            
+            // Check if it's a sample order
+            if (sampleOrders[orderId]) {
+                const order = sampleOrders[orderId];
+                displayOrderTracking(orderId, order);
+                trackingInfo.style.display = 'block';
+            } 
+            // Check if it's an order from localStorage
+            else if (checkLocalStorageOrder(orderId)) {
+                const order = getOrderFromLocalStorage(orderId);
+                displayOrderTracking(orderId, order);
+                trackingInfo.style.display = 'block';
+            }
+            else {
+                noOrderFound.style.display = 'block';
+                loadRecentOrders(); // Show recent orders if available
+            }
+            
+            // Scroll to results
+            if (trackingInfo.style.display === 'block' || noOrderFound.style.display === 'block') {
+                trackingInfo.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function checkLocalStorageOrder(orderId) {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            return orders.some(order => order.id === orderId);
+        }
+
+        function getOrderFromLocalStorage(orderId) {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const order = orders.find(order => order.id === orderId);
+            
+            if (order) {
+                // Determine progress based on status
+                let progress = 1;
+                if (order.status === 'confirmed') progress = 2;
+                else if (order.status === 'processing') progress = 3;
+                else if (order.status === 'shipped') progress = 4;
+                else if (order.status === 'delivered') progress = 5;
+                
+                return {
+                    status: order.status,
+                    progress: progress,
+                    estimatedDelivery: calculateEstimatedDelivery(order.date),
+                    lastUpdated: new Date().toLocaleString(),
+                    shippingAddress: `${order.shipping.address}, ${order.shipping.city} - ${order.shipping.pincode}`,
+                    contact: `${order.shipping.name} - ${order.shipping.phone}`
+                };
+            }
+            return null;
+        }
+
+        function calculateEstimatedDelivery(orderDate) {
+            const deliveryDate = new Date(orderDate);
+            deliveryDate.setDate(deliveryDate.getDate() + 3); // 3 days delivery
+            return deliveryDate.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+
+        function displayOrderTracking(orderId, order) {
+            // Update order details
+            document.getElementById('track-order-id').textContent = orderId;
+            document.getElementById('track-status').textContent = order.status.charAt(0).toUpperCase() + order.status.slice(1);
+            document.getElementById('track-delivery').textContent = order.estimatedDelivery;
+            document.getElementById('track-updated').textContent = order.lastUpdated;
+            document.getElementById('shipping-address').textContent = order.shippingAddress;
+            document.getElementById('shipping-contact').textContent = order.contact;
+            
+            // Update progress steps
+            resetProgressSteps();
+            for (let i = 1; i <= order.progress; i++) {
+                const step = document.getElementById(`step-${getStepName(i)}`);
+                if (step) {
+                    step.classList.add('completed');
+                    if (i === order.progress) {
+                        step.classList.add('active');
+                    }
+                }
+            }
+        }
+
+        function getStepName(stepNumber) {
+            const steps = {
+                1: 'ordered',
+                2: 'confirmed', 
+                3: 'processed',
+                4: 'shipped',
+                5: 'delivered'
+            };
+            return steps[stepNumber] || 'ordered';
+        }
+
+        function resetProgressSteps() {
+            const steps = document.querySelectorAll('.step');
+            steps.forEach(step => {
+                step.classList.remove('completed', 'active');
+            });
+            // First step is always completed
+            document.getElementById('step-ordered').classList.add('completed');
+        }
+
+        function loadRecentOrders() {
+            const recentOrdersList = document.getElementById('recent-orders-list');
+            const recentOrdersSection = document.getElementById('recent-orders');
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            
+            if (orders.length > 0) {
+                // Show recent 3 orders
+                const recentOrders = orders.slice(-3).reverse();
+                
+                recentOrdersList.innerHTML = recentOrders.map(order => `
+                    <div class="order-card" style="margin-bottom: 1rem;">
+                        <div class="order-header">
+                            <div>
+                                <span class="order-id">${order.id}</span>
+                                <span class="order-date">${order.date}</span>
+                            </div>
+                            <span class="order-status status-${order.status}">${order.status.charAt(0).toUpperCase() + order.status.slice(1)}</span>
+                        </div>
+                        <div style="text-align: center; margin-top: 1rem;">
+                            <button onclick="trackThisOrder('${order.id}')" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 0.9rem;">
+                                Track This Order
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+                recentOrdersSection.style.display = 'block';
+            }
+        }
+
+        function trackThisOrder(orderId) {
+            document.getElementById('order-id').value = orderId;
+            trackOrder();
+        }
+
+        // Mobile menu functionality
+        const hamburger = document.querySelector('.hamburger');
+        const navMenu = document.querySelector('.nav-menu');
+
+        if (hamburger) {
+            hamburger.addEventListener('click', () => {
+                hamburger.classList.toggle('active');
+                if (navMenu) navMenu.classList.toggle('active');
+            });
+        }
+
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-link').forEach(n => n.addEventListener('click', () => {
+            if (hamburger) hamburger.classList.remove('active');
+            if (navMenu) navMenu.classList.remove('active');
+        }));
+    }
+
+    // Track order animations
+    function setupTrackOrderAnimations() {
+        // Animate tracking steps
+        const steps = document.querySelectorAll('.step');
+        steps.forEach((step, index) => {
+            step.style.opacity = '0';
+            step.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                step.style.transition = 'all 0.5s ease-out';
+                step.style.opacity = '1';
+                step.style.transform = 'translateY(0)';
+            }, index * 200);
+        });
+
+        // Animate tracking info when shown
+        const trackingInfo = document.getElementById('tracking-info');
+        if (trackingInfo) {
+            trackingInfo.style.opacity = '0';
+            trackingInfo.style.transform = 'translateY(30px)';
+        }
+    }
+
+    // Enhanced display order tracking with animations
+    function displayOrderTracking(orderId, order) {
+        // Update order details
+        document.getElementById('track-order-id').textContent = orderId;
+        document.getElementById('track-status').textContent = order.status.charAt(0).toUpperCase() + order.status.slice(1);
+        document.getElementById('track-delivery').textContent = order.estimatedDelivery;
+        document.getElementById('track-updated').textContent = order.lastUpdated;
+        document.getElementById('shipping-address').textContent = order.shippingAddress;
+        document.getElementById('shipping-contact').textContent = order.contact;
+        
+        // Update progress steps with animation
+        resetProgressSteps();
+        animateProgressSteps(order.progress);
+        
+        // Animate tracking info appearance
+        const trackingInfo = document.getElementById('tracking-info');
+        trackingInfo.style.display = 'block';
+        trackingInfo.style.opacity = '0';
+        trackingInfo.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            trackingInfo.style.transition = 'all 0.6s ease-out';
+            trackingInfo.style.opacity = '1';
+            trackingInfo.style.transform = 'translateY(0)';
+        }, 100);
+    }
+
+    function animateProgressSteps(progress) {
+        for (let i = 1; i <= progress; i++) {
+            setTimeout(() => {
+                const step = document.getElementById(`step-${getStepName(i)}`);
+                if (step) {
+                    step.classList.add('completed');
+                    if (i === progress) {
+                        step.classList.add('active');
+                        // Add pulse animation to current step
+                        step.style.animation = 'pulse 0.6s ease-out';
+                        setTimeout(() => {
+                            step.style.animation = '';
+                        }, 600);
+                    }
+                }
+            }, i * 300);
+        }
+    }
+
+    // Add CSS for track order animations
+    const trackOrderStyles = document.createElement('style');
+    trackOrderStyles.textContent = `
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .step {
+            transition: all 0.3s ease;
+        }
+        
+        .step.completed .step-number {
+            animation: stepComplete 0.5s ease-out;
+        }
+        
+        @keyframes stepComplete {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .tracking-info {
+            transition: all 0.6s ease-out;
+        }
+        
+        .order-details,
+        .shipping-info {
+            transition: all 0.3s ease;
+        }
+        
+        .order-details:hover,
+        .shipping-info:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+    `;
+    document.head.appendChild(trackOrderStyles);
+    </script>
+</body>
+</html>

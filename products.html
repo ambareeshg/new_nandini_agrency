@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - Nandini Pharma</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="page-ornament left"></div>
+    <div class="page-ornament right"></div>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h2>New Nandini Medical &amp; Agency</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="products.html" class="nav-link active">Products</a></li>
+                    <li><a href="cart.html" class="nav-link">Cart (<span id="cart-count">0</span>)</a></li>
+                    <li><a href="track-order.html" class="nav-link">Track Order</a></li>
+                    <li><a href="order-history.html" class="nav-link">Order History</a></li>
+                    <li><a href="login.html" class="nav-link">Login</a></li>
+                    <li><a href="admin.html" class="nav-link">Admin</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="products-page">
+        <div class="container">
+            <h1>Bulk Medicine Products</h1>
+            <p style="text-align: center; margin-bottom: 2rem; color: #666;">Wholesale medicines for medical stores and pharmacies. Choose from various packaging options.</p>
+            
+            <!-- Category Filter -->
+            <div class="category-filter">
+                <button class="filter-btn active" data-category="all">All Products</button>
+                <button class="filter-btn" data-category="tablets">Tablets</button>
+                <button class="filter-btn" data-category="syrups">Syrups</button>
+                <button class="filter-btn" data-category="suspensions">Suspensions</button>
+                <button class="filter-btn" data-category="injections">Injections</button>
+                <button class="filter-btn" data-category="generic">Generic Items</button>
+            </div>
+
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <input type="text" id="search-input" placeholder="Search medicines by name...">
+                <button onclick="searchProducts()">Search</button>
+            </div>
+
+            <!-- Products Grid -->
+            <div class="products-grid" id="products-grid">
+                <!-- Products will be loaded by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>New Nandini Medical and Agency</h3>
+                    <p>Your trusted partner in healthcare</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="track-order.html">Track Order</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <p>📧 Email: newnandinimedicalandagency@gmail.com</p>
+                    <p>📞 Phone: +91 9148382242</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/backend.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart - Nandini Pharma</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <div class="page-ornament left"></div>
+    <div class="page-ornament right"></div>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h2>New Nandini Medical &amp; Agency</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="products.html" class="nav-link">Products</a></li>
+                    <li><a href="cart.html" class="nav-link active">Cart (<span id="cart-count">0</span>)</a></li>
+                    <li><a href="track-order.html" class="nav-link">Track Order</a></li>
+                    <li><a href="order-history.html" class="nav-link">Order History</a></li>
+                    <li><a href="login.html" class="nav-link">Login</a></li>
+                    <li><a href="admin.html" class="nav-link">Admin</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="cart-page">
+        <div class="container">
+            <div class="cart-header">
+                <h1>Shopping Cart</h1>
+                <p>Review your selected medicines before checkout</p>
+            </div>
+            
+            <div class="cart-container">
+                <div class="cart-main">
+                    <div id="cart-items-section">
+                        <!-- Cart items will be loaded by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="cart-sidebar">
+                    <div class="order-summary-card">
+                        <h3>Order Summary</h3>
+                        <div class="summary-details">
+                            <div class="summary-row">
+                                <span>Subtotal:</span>
+                                <span id="subtotal">₹0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Tax (5%):</span>
+                                <span id="tax">₹0.00</span>
+                            </div>
+                            <div class="summary-row">
+                                <span>Shipping:</span>
+                                <span id="shipping">₹50.00</span>
+                            </div>
+                            <div class="summary-row total">
+                                <span>Total:</span>
+                                <span id="total">₹50.00</span>
+                            </div>
+                        </div>
+                        
+                        <div class="delivery-info">
+                            <div class="delivery-icon">🚚</div>
+                            <div class="delivery-text">
+                                <strong>Free Delivery</strong>
+                                <span>Add ₹500 more for free delivery</span>
+                            </div>
+                        </div>
+                        
+                        <button class="checkout-btn" onclick="proceedToCheckout()">
+                            <span>Proceed to Checkout</span>
+                            <span class="btn-arrow">→</span>
+                        </button>
+                        
+                        <div class="continue-shopping">
+                            <a href="products.html">← Continue Shopping</a>
+                        </div>
+                        
+                        <div class="security-badge">
+                            <div class="security-icon">🛡️</div>
+                            <div class="security-text">
+                                <strong>Secure Checkout</strong>
+                                <span>Your payment information is safe</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>New Nandini Medical and Agency</h3>
+                    <p>Your trusted partner in healthcare. We provide genuine medicines with fast delivery and excellent customer service.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="products.html">Products</a></li>
+                        <li><a href="cart.html">Cart</a></li>
+                        <li><a href="track-order.html">Track Order</a></li>
+                        <li><a href="order-history.html">Order History</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact Info</h4>
+                    <p>📧 Email: info@nandinipharma.com</p>
+                    <p>📞 Phone: +1 234 567 890</p>
+                    <p>🏢 Address: 123 Medical Street, Healthcare City</p>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #34495e;">
+                <p>&copy; 2024 New Nandini Medical &amp; Agency. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/backend.js"></script>
+    <script src="js/cart.js"></script>
+</body>
+</html>

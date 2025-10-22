@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Nandini Pharma</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+    .error-text { color: #e74c3c; font-weight: 600; display:none; }
+    .error-text.show { display:block; animation: shakeFade 0.6s ease; }
+    @keyframes shakeFade {
+        0% { transform: translateX(0); opacity: .8; }
+        25% { transform: translateX(-6px); }
+        50% { transform: translateX(6px); }
+        75% { transform: translateX(-3px); }
+        100% { transform: translateX(0); opacity: 1; }
+    }
+    </style>
+</head>
+<body>
+    <div class="page-ornament left"></div>
+    <div class="page-ornament right"></div>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <span class="brand-logo" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M4 12c0-4.418 3.582-8 8-8s8 3.582 8 8-3.582 8-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                            <path d="M8 12h8M12 8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </span>
+                    <h2>New Nandini Medical &amp; Agency</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="nav-link">Home</a></li>
+                    <li><a href="products.html" class="nav-link">Products</a></li>
+                    <li><a href="cart.html" class="nav-link">Cart (<span id="cart-count">0</span>)</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                    <span class="bar"></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <section class="auth-page">
+        <div class="container">
+            <h1>Login / Signup</h1>
+            <p style="text-align: center; margin-bottom: 2rem; color: #666;">Login using email or phone. Enter OTP to verify.</p>
+
+            <div class="auth-card" style="max-width: 520px; margin: 0 auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+                <div style="display:flex; gap:8px; margin-bottom:1rem;">
+                    <button id="tab-signin" class="filter-btn" style="flex:1">Sign In</button>
+                    <button id="tab-signup" class="filter-btn" style="flex:1">Sign Up</button>
+                </div>
+                <div id="signin-section">
+                  <div class="form-group">
+                    <label for="identifier">Email or Phone</label>
+                    <input type="text" id="identifier" placeholder="you@example.com or +91XXXXXXXXXX" required>
+                    <small style="color:#888">Phone must include country code, e.g. +91…</small>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="otp">One-Time Password</label>
+                    <input type="text" id="otp" placeholder="Enter 6-digit OTP" inputmode="numeric" pattern="[0-9]*" disabled>
+                  </div>
+
+                  <div style="display:flex; gap:10px; align-items:center;">
+                    <button id="send-otp" class="cta-button" style="flex:1">Send OTP</button>
+                    <button id="resend-otp" class="cta-button" style="flex:1; opacity:.6; cursor:not-allowed" disabled>Resend (60s)</button>
+                  </div>
+
+                  <button id="verify-otp" class="place-order-btn" style="margin-top:12px;" disabled>Verify & Continue</button>
+                </div>
+
+                <div id="signup-section" style="display:none; margin-top: 1rem;">
+                    <div class="form-group"><label for="su-name">Name of Medical / User</label><input id="su-name" type="text" required></div>
+                    <div class="form-group"><label for="su-phone">Phone Number</label><input id="su-phone" type="text" inputmode="numeric" maxlength="10" placeholder="10 digits" required></div>
+                    <div class="form-group"><label for="su-email">Email</label><input id="su-email" type="email" placeholder="you@gmail.com" required></div>
+                    <div class="form-group"><label for="su-address">Address</label><input id="su-address" type="text" required></div>
+                    <div class="form-group"><label for="su-landmark">Landmark</label><input id="su-landmark" type="text" required></div>
+                    <div class="form-group"><label for="su-pincode">Pincode</label><input id="su-pincode" type="text" inputmode="numeric" maxlength="6" placeholder="6-digit pincode" required></div>
+                    <div class="form-group"><label for="su-city">City</label>
+                        <select id="su-city" required>
+                            <option value="">Select city</option>
+                            <option>Bengaluru</option>
+                            <option>Mysuru</option>
+                            <option>Mangaluru</option>
+                            <option>Hubballi</option>
+                            <option>Belagavi</option>
+                            <option>Ballari</option>
+                            <option>Shivamogga</option>
+                            <option>Tumakuru</option>
+                            <option>Davanagere</option>
+                            <option>Vijayapura</option>
+                            <option>Kalaburagi</option>
+                            <option>Udupi</option>
+                            <option>Dharwad</option>
+                            <option>Raichur</option>
+                            <option>Hassan</option>
+                            <option>Kolar</option>
+                            <option>Mandya</option>
+                            <option>Chikkamagaluru</option>
+                            <option>Bagalkote</option>
+                            <option>Bidar</option>
+                            <option>Gadag</option>
+                            <option>Haveri</option>
+                            <option>Kodagu</option>
+                            <option>Koppal</option>
+                            <option>Ramanagara</option>
+                            <option>Chitradurga</option>
+                            <option>Yadgir</option>
+                            <option>Chikkaballapura</option>
+                            <option>Bengaluru Rural</option>
+                            <option>Uttara Kannada</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label for="su-state">State</label><input id="su-state" type="text" value="Karnataka" required></div>
+                    <div class="form-group"><label for="su-alt">Alternate Phone</label><input id="su-alt" type="text" inputmode="numeric" maxlength="10" placeholder="10 digits" required></div>
+                    <div id="pincode-status" style="font-size:.9rem; color:#666; margin-bottom: .5rem;"></div>
+                    <div id="signup-error" class="error-text">please fill all the fileds before saving</div>
+                    <button id="signup-submit" class="checkout-btn">Create Account</button>
+                </div>
+                <p id="status" style="margin-top: 1rem; color: #666; font-size: 0.9rem;"></p>
+            </div>
+
+            <div id="current-user" style="display:none; text-align:center; margin-top:2rem;"></div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #34495e;">
+                <p>&copy; 2024 New Nandini Medical &amp; Agency. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-config.js"></script>
+    <script src="js/backend.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', async function() {
+        const idInput = document.getElementById('identifier');
+        const otpInput = document.getElementById('otp');
+        const sendOtpBtn = document.getElementById('send-otp');
+        const resendBtn = document.getElementById('resend-otp');
+        const verifyBtn = document.getElementById('verify-otp');
+        const status = document.getElementById('status');
+        const currentUserDiv = document.getElementById('current-user');
+        let countdownTimer = null;
+        const tabSignin = document.getElementById('tab-signin');
+        const tabSignup = document.getElementById('tab-signup');
+        const signinSection = document.getElementById('signin-section');
+        const signupSection = document.getElementById('signup-section');
+
+        function switchTab(tab){
+            if (tab === 'signin') {
+                signinSection.style.display = 'block';
+                signupSection.style.display = 'none';
+                tabSignin.classList.add('active');
+                tabSignup.classList.remove('active');
+            } else {
+                signinSection.style.display = 'none';
+                signupSection.style.display = 'block';
+                tabSignup.classList.add('active');
+                tabSignin.classList.remove('active');
+            }
+        }
+        switchTab('signin');
+        tabSignin.addEventListener('click', ()=> switchTab('signin'));
+        tabSignup.addEventListener('click', ()=> switchTab('signup'));
+
+        async function refreshUser() {
+            const user = await window.backend.getCurrentUser();
+            if (user) {
+                currentUserDiv.style.display = 'block';
+                currentUserDiv.innerHTML = `Logged in as <strong>${user.email}</strong> — <a href="#" id="logout">Logout</a>`;
+                document.getElementById('logout').addEventListener('click', async (e) => {
+                    e.preventDefault();
+                    await window.backend.signOut();
+                    location.reload();
+                });
+                await window.backend.upsertUserProfile(user);
+            } else {
+                currentUserDiv.style.display = 'none';
+            }
+        }
+
+        await refreshUser();
+
+        function isEmail(str){ return /@/.test(str); }
+        function startCountdown(seconds){
+            let left = seconds;
+            resendBtn.disabled = true;
+            resendBtn.style.opacity = '.6';
+            resendBtn.style.cursor = 'not-allowed';
+            resendBtn.textContent = `Resend (${left}s)`;
+            if (countdownTimer) clearInterval(countdownTimer);
+            countdownTimer = setInterval(() => {
+                left -= 1;
+                resendBtn.textContent = `Resend (${left}s)`;
+                if (left <= 0) {
+                    clearInterval(countdownTimer);
+                    resendBtn.disabled = false;
+                    resendBtn.style.opacity = '1';
+                    resendBtn.style.cursor = 'pointer';
+                    resendBtn.textContent = 'Resend OTP';
+                }
+            }, 1000);
+        }
+
+        async function sendOtp() {
+            const identifier = idInput.value.trim();
+            if (!identifier) { status.textContent = 'Please enter email or phone.'; return; }
+            status.textContent = 'Sending OTP...';
+            let resp;
+            if (isEmail(identifier)) {
+                resp = await window.backend.requestEmailOtp(identifier);
+            } else {
+                // normalize +91
+                const normalized = identifier.replace(/\D/g, '');
+                if (normalized.length !== 10 && !/^\+?\d{12}$/.test(identifier)) {
+                    status.textContent = 'Enter valid phone: +91XXXXXXXXXX or 10 digits';
+                    return;
+                }
+                const phone = identifier.startsWith('+') ? identifier : `+91${normalized.slice(-10)}`;
+                resp = await window.backend.requestPhoneOtp(phone);
+            }
+            if (resp && resp.error) {
+                status.textContent = 'Failed to send OTP: ' + (resp.error.message || resp.error);
+                return;
+            }
+            status.textContent = 'OTP sent. Enter the code below.';
+            otpInput.disabled = false;
+            verifyBtn.disabled = false;
+            startCountdown(60);
+        }
+
+        sendOtpBtn.addEventListener('click', sendOtp);
+        resendBtn.addEventListener('click', sendOtp);
+
+        verifyBtn.addEventListener('click', async function(){
+            const identifier = idInput.value.trim();
+            const token = otpInput.value.trim();
+            if (!identifier || !token) { status.textContent = 'Enter identifier and OTP.'; return; }
+            status.textContent = 'Verifying...';
+            let resp;
+            if (isEmail(identifier)) {
+                resp = await window.backend.verifyOtp({ email: identifier, token });
+            } else {
+                const normalized = identifier.startsWith('+') ? identifier : `+91${identifier.replace(/\D/g, '').slice(-10)}`;
+                resp = await window.backend.verifyOtp({ phone: normalized, token });
+            }
+            if (resp && resp.error) {
+                status.textContent = 'Invalid OTP. Please try again.';
+                return;
+            }
+            status.textContent = 'Verified! Redirecting...';
+            await refreshUser();
+            setTimeout(()=> { window.location.href = 'index.html'; }, 800);
+        });
+
+        // Sign Up flow validations and submission
+        const su = {
+            name: document.getElementById('su-name'),
+            phone: document.getElementById('su-phone'),
+            email: document.getElementById('su-email'),
+            address: document.getElementById('su-address'),
+            landmark: document.getElementById('su-landmark'),
+            pincode: document.getElementById('su-pincode'),
+            city: document.getElementById('su-city'),
+            state: document.getElementById('su-state'),
+            alt: document.getElementById('su-alt'),
+            error: document.getElementById('signup-error'),
+            submit: document.getElementById('signup-submit'),
+            pinStatus: document.getElementById('pincode-status')
+        };
+
+        function normalizePhone(input) {
+            const digits = input.replace(/\D/g, '').slice(-10);
+            if (digits.length !== 10) return null;
+            return `+91${digits}`;
+        }
+
+        function validEmail(email) {
+            return /^[\w.+-]+@([\w-]+\.)+(gmail|yahoo|outlook|hotmail|icloud|protonmail|zoho|yandex|mail)\.(com|in|net)$/i.test(email);
+        }
+
+        su.pincode.addEventListener('input', () => {
+            su.pincode.value = su.pincode.value.replace(/\D/g, '').slice(0,6);
+        });
+
+        // Allow only digits for phone fields (10 digits)
+        function enforceDigits(el){
+            el.addEventListener('input', () => {
+                el.value = el.value.replace(/\D/g, '').slice(0,10);
+            });
+        }
+        enforceDigits(su.phone);
+        enforceDigits(su.alt);
+
+        su.pincode.addEventListener('blur', async () => {
+            const pin = su.pincode.value.trim();
+            if (pin.length === 6) {
+                const { deliverable } = await window.backend.checkPincodeDeliverable(pin);
+                su.pinStatus.textContent = deliverable ? 'Deliverable ✅' : 'Not deliverable ❌';
+                su.pinStatus.style.color = deliverable ? '#27ae60' : '#e74c3c';
+            } else {
+                su.pinStatus.textContent = '';
+            }
+        });
+
+        su.submit.addEventListener('click', async () => {
+            su.error.classList.remove('show');
+            const details = {
+                name: su.name.value.trim(),
+                phoneRaw: su.phone.value.trim(),
+                email: su.email.value.trim(),
+                address: su.address.value.trim(),
+                landmark: su.landmark.value.trim(),
+                pincode: su.pincode.value.trim(),
+                city: su.city.value,
+                state: su.state.value.trim(),
+                altPhoneRaw: su.alt.value.trim()
+            };
+
+            const phone = normalizePhone(details.phoneRaw);
+            const altPhone = normalizePhone(details.altPhoneRaw);
+            const emailOk = validEmail(details.email);
+            const allPresent = details.name && phone && emailOk && details.address && details.landmark && details.pincode.length === 6 && details.city && details.state && altPhone;
+
+            if (!allPresent) {
+                su.error.classList.add('show');
+                return;
+            }
+
+            // Save to DB
+            const result = await window.backend.saveUserProfile({
+                name: details.name,
+                phone,
+                email: details.email,
+                address: details.address,
+                pincode: details.pincode,
+                landmark: details.landmark,
+                altPhone,
+                city: details.city,
+                state: details.state
+            });
+            if (result && result.error) {
+                su.error.textContent = 'Could not save. Try again.';
+                su.error.classList.add('show');
+                return;
+            }
+            status.textContent = 'Profile saved. You can now sign in.';
+            switchTab('signin');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    });
+    </script>
+</body>
+</html>
+
